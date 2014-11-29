@@ -11,11 +11,11 @@
 	</style>
 	<body>
 		<form method = "post">
-			<h1><strong>INGRESO A MOTLEY</strong></h1>
+			<h1><strong>INGRESO AL SISTEMA DE MOTLEY</strong></h1>
 			<label>
 			
 			<div>Jugador/Nombre de usuario</div>
-			<input type="text" name = "ijugador" value={{ijugador}} >
+			<input type="text" name = "iusuario" value={{ijugador}} >
 			<div class="error">{{errorJugador}}</div>
 			
 			</label>
@@ -23,12 +23,13 @@
 			<label>
 			
 			<div>Password</div>
-			<input type="password" name="imonto">
+			<input type="password" name="ipassword">
 			
 			</label>
 			
 			<input type="submit">
 			
 		</form>
+		<p> Si no tenés usuario hace click</p> <a href="/nuevo_usuario"> aquí</a>
 	</body>
 </html>

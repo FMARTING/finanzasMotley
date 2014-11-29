@@ -17,6 +17,11 @@
 import os
 import webapp2
 import jinja2
+import re
+import cgi
+import random
+import string
+import hashlib
 
 from google.appengine.ext import db
 
@@ -24,8 +29,23 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
 
+USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+
 Jugadores = dict([(0,'N/A'),(1,'Pablo'),(2,'Facu'),(3,'Agus B.'),(4,'Cesar'),(5,'Martin'),(6,'Seba'),(7,'Chino'),(8,'Marian'),(9,'Facu H.'),(10,'Jony'),
 	(11,'Alan'),(12,'Beli'),(13,'Diego'),(14,'Ryan'),(15,'Gabi'),(16,'Extra'),(17,'liga')])
+
+def valid_username(username):
+   return USER_RE.match(username)
+
+def validarUsuario(u):
+	cursorJ = db.GqlQuery("Select * from Jugadores where usuario = :1", u).get()
+	if cursorJ:
+		return True
+	return False
+
+def matched_password(password, verify):
+	if password == verify: return True
+	else: return False
 
 class Handler(webapp2.RequestHandler):
 	def write (self, *a, **kw):
@@ -35,17 +55,26 @@ class Handler(webapp2.RequestHandler):
 		return t.render(params)
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
+
 class MotleyMensual(db.Model):
 	deuda = db.IntegerProperty(required = True)
 	pago = db.IntegerProperty(required = True)
 	saldo = db.IntegerProperty(required = True)
 	mes = db.IntegerProperty(required = True)
 	ano = db.IntegerProperty(required = True)
+
 class Pago(db.Model):
 	fecha = db.DateTimeProperty(auto_now_add = True)
 	jugador = db.StringProperty(required = True)
 	monto = db.IntegerProperty(required = True)
 	descr = db.StringProperty()
+
+class Jugadores (db.Model):
+	nombre = db.StringProperty(required = True)
+	apellido = db.StringProperty(required = True)
+	usuario = db.StringProperty(required = True)
+	password = db.StringProperty(required = True)
+
 class Input(Handler):
 	
 	def renderPagos(self, error = "" , ijugador = "" , imonto = "" , idescr = "" , errorJugador = ""):
@@ -81,7 +110,20 @@ class Login(Handler):
 	def get(self):
 		self.render("login.html")
 	def post(self):
-		usuario = self.re
+		usuario = self.request.get("iusuario")
+		password = sef.request.get("ipassword")		
+
+class nuevoUsuario(Handler):
+	def get(self):
+		self.render("nuevo_usuario.html")
+	def post(self):
+		nombre = escape(self.request.get('inombre')
+		apellido = escape(self.request.get('iapellido')
+		usuario = escape(self.request.get('iusuario'))
+		ipassword = escape(self.request.get('ipass'))
+		iverify = escape(self.request.get('iverif'))
+		checked_verify = matched_password(ipassword, iverify)
+		
 
 class MainPage(Handler):
     def get(self):
@@ -115,4 +157,4 @@ class MainPage(Handler):
 			saldoTotal = saldoTotal + i.saldo
 		self.render("front.html", cursorMensual = cursorMensual, cursorPago = cursorPago, deudaTotal = deudaTotal, pagosTotal = pagosTotal, saldoTotal = saldoTotal)
 
-app = webapp2.WSGIApplication([('/', Login),('/pago', Input),('/main', MainPage)], debug=True)
+app = webapp2.WSGIApplication([('/', Login),('/pago', Input),('/main', MainPage),('/nuevo_usuario', nuevoUsuario)], debug=True)
