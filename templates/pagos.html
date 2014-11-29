@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Finanzas MOTLEY</title>
+	</head>
+	<style type="text/css">
+		.error {
+		color:red;
+		}
+	</style>
+	<body>
+		<form method = "post">
+			<h1><strong>PAGOS DE MOTLEY</strong></h1>
+			<label>
+			
+			<div>Jugador</div>
+			<input type="text" name = "ijugador" value={{ijugador}} >
+			<div class="error">{{errorJugador}}</div>
+			
+			</label>
+			
+			<label>
+			
+			<div>Monto</div>
+			<input type="text" name="imonto">
+			
+			</label>
+			
+			<label>
+			
+			<div>Descripcion</div>
+			<textarea name="idescripcion"></textarea>
+			
+			</label>
+			<br>
+			<div class="error">{{error}}</div>
+			
+			<input type="submit">
+			
+		</form>
+	</body>
+</html>

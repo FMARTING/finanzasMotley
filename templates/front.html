@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Finanzas MOTLEY</title>
+	</head>
+	
+	<style type="text/css">
+	table, th, td{
+	border: 1px solid black;
+	text-align:center;
+	width: 10px;
+	table-layout: auto;
+	}
+	</style>
+	<body>
+		<h1> Finanzas generales de MOTLEY </h1>
+		
+		<h2>Saldos mensuales del equipo</h2>
+			<table style="width:40%">
+				<tr>
+					<td><strong>AÑO</strong></td>
+					<td><strong>MES</strong></td>
+					<td><strong>DEUDA</strong></td> 
+					<td><strong>PAGOS</strong></td>
+					<td><strong>SALDO</strong></td>
+				</tr>
+			  {% for i in cursorMensual %}
+				<tr>
+					<td>{{i.ano}}</td>
+					<td>{{i.mes}}</td>
+					<td>{{i.deuda}}</td> 
+					<td>{{i.pago}}</td>
+					{% if i.saldo < 0 %}
+					<td style="color:red">{{i.saldo}}</td>
+					{% endif %}
+					{% if i.saldo > 0 %}
+					<td style="color:blue">{{i.saldo}}</td>
+					{% endif %}
+				</tr>
+			  {% endfor %}
+				<tr>
+					<td>Total del año</td>
+					<td>-</td>
+					<td>{{deudaTotal}}</td>
+					<td>{{pagosTotal}}</td>
+					{% if saldoTotal <0 %}
+					<td style="color:red">{{saldoTotal}}</td>
+					{% else %}
+					<td style="color:blue">{{saldoTotal}}</td>
+					{% endif %}
+				</tr>
+			</table>
+		<br>
+		<br>
+		
+		<h2>Historial de pagos</h2>
+			<table style="width:40%">
+				<tr>
+					<td><strong>FECHA</strong></td>
+					<td><strong>JUGADOR</strong></td> 
+					<td><strong>PAGO</strong></td>
+					<td><strong>DESCRIPCION</strong></td>
+				</tr>
+		{% for i in cursorPago %}
+				<tr>
+					<td>{{i.fecha}}</td>
+					<td>{{i.jugador}}</td>
+					{% if i.monto <0 %}
+					<td style="color:red">{{i.monto}}</td>
+					{% else %}
+					<td style="color:blue">{{i.monto}}</td>
+					{% endif %}
+					<td>{{i.descr}}</td>
+				</tr>
+		{% endfor %}
+	</body>
+</html>
