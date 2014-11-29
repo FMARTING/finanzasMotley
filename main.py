@@ -31,9 +31,26 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), a
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 
+PASS_RE = re.compile(r"^.{3,20}$")
+
 Jugadores = dict([(0,'N/A'),(1,'Pablo'),(2,'Facu'),(3,'Agus B.'),(4,'Cesar'),(5,'Martin'),(6,'Seba'),(7,'Chino'),(8,'Marian'),(9,'Facu H.'),(10,'Jony'),
 	(11,'Alan'),(12,'Beli'),(13,'Diego'),(14,'Ryan'),(15,'Gabi'),(16,'Extra'),(17,'liga')])
 
+def make_salt():
+    return ''.join(random.choice(string.letters) for x in xrange(5))
+
+def escape(s):
+	return cgi.escape(s, quote = True)
+
+def make_pw_hash(name, pw, salt = None):
+	if not salt:
+		salt = make_salt()
+	h = hashlib.sha256(name + pw + salt).hexdigest()
+	return '%s|%s' %(h, salt)
+
+def valid_pass(password):
+   return PASS_RE.match(password)
+  
 def valid_username(username):
    return USER_RE.match(username)
 
@@ -114,16 +131,30 @@ class Login(Handler):
 		password = sef.request.get("ipassword")		
 
 class nuevoUsuario(Handler):
+	def renderNuevo(self, errorVerif = "" , inombre = "" , iapellido = "" , iusuario = "" , ipass = "", iverif = ""):
+		self.render("nuevo_usuario.html", errorVerif = errorVerif, inombre = inombre, iapellido = iapellido, iusuario = iusuario, ipass = ipass, iverif = iverif)
+
 	def get(self):
-		self.render("nuevo_usuario.html")
+		self.renderNuevo()
 	def post(self):
-		nombre = escape(self.request.get('inombre')
-		apellido = escape(self.request.get('iapellido')
+		nombre = escape(self.request.get('inombre'))
+		apellido = escape(self.request.get('iapellido'))
 		usuario = escape(self.request.get('iusuario'))
-		ipassword = escape(self.request.get('ipass'))
-		iverify = escape(self.request.get('iverif'))
-		checked_verify = matched_password(ipassword, iverify)
-		
+		password = escape(self.request.get('ipass'))
+		verify = escape(self.request.get('iverif'))
+		checked_verify = matched_password(password, verify)
+		hpassword = make_pw_hash(usuario, password)
+		if valid_username(usuario) and valid_pass(password) and checked_verify:
+			usuario = str(usuario)
+			if validarUsuario(usuario):
+				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword)
+				a.put()
+				self.response.headers.add_header('Set-Cookie', 'name = %s; Path=/' %(usuario))
+				self.response.headers.add_header('Set-Cookie', 'pass = %s; Path=/' %(hpassword))
+				self.redirect('/main')
+		if not checked_verify:
+			errorVerificacion = "Las claves no son iguales"
+			self.renderNuevo(errorVerif = errorVerificacion, inombre = nombre, iapellido = apellido, iusuario = usuario)
 
 class MainPage(Handler):
     def get(self):
