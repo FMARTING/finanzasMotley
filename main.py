@@ -36,6 +36,16 @@ PASS_RE = re.compile(r"^.{3,20}$")
 Jugadores = dict([(0,'N/A'),(1,'Pablo'),(2,'Facu'),(3,'Agus B.'),(4,'Cesar'),(5,'Martin'),(6,'Seba'),(7,'Chino'),(8,'Marian'),(9,'Facu H.'),(10,'Jony'),
 	(11,'Alan'),(12,'Beli'),(13,'Diego'),(14,'Ryan'),(15,'Gabi'),(16,'Extra'),(17,'liga')])
 
+def loginCheck(u,p,h):
+	salt = h.split('|')[1]
+	return h == make_pw_hash(u,p,salt)
+	
+def uniqueUser(nombre): # Si el usuario es unico devuelve Verdadero
+	x = db.GqlQuery("Select * from Jugadores where nombre= :1", nombre).get()
+	if x:
+		return False
+	return True
+
 def make_salt():
     return ''.join(random.choice(string.letters) for x in xrange(5))
 
@@ -53,12 +63,6 @@ def valid_pass(password):
   
 def valid_username(username):
    return USER_RE.match(username)
-
-def validarUsuario(u):
-	cursorJ = db.GqlQuery("Select * from Jugadores where usuario = :1", u).get()
-	if cursorJ:
-		return True
-	return False
 
 def matched_password(password, verify):
 	if password == verify: return True
@@ -128,11 +132,15 @@ class Login(Handler):
 		self.render("login.html")
 	def post(self):
 		usuario = self.request.get("iusuario")
-		password = sef.request.get("ipassword")		
+		password = self.request.get("ipassword")
+		x = db.GqlQuery("Select * from Jugadores where usuario= :1", usuario).get()
+		hashedPassword = x.password
+		if loginCheck(usuario, password, hashedPassword):
+			self.redirect('/main')
 
 class nuevoUsuario(Handler):
-	def renderNuevo(self, errorVerif = "" , inombre = "" , iapellido = "" , iusuario = "" , ipass = "", iverif = ""):
-		self.render("nuevo_usuario.html", errorVerif = errorVerif, inombre = inombre, iapellido = iapellido, iusuario = iusuario, ipass = ipass, iverif = iverif)
+	def renderNuevo(self, errorUsuario = "", errorVerif = "" , inombre = "" , iapellido = "" , iusuario = "" , ipass = "", iverif = "", errorPass = ""):
+		self.render("nuevo_usuario.html", errorUsuario = errorUsuario, errorVerif = errorVerif, inombre = inombre, iapellido = iapellido, iusuario = iusuario, ipass = ipass, iverif = iverif, errorPass = errorPass)
 
 	def get(self):
 		self.renderNuevo()
@@ -146,15 +154,24 @@ class nuevoUsuario(Handler):
 		hpassword = make_pw_hash(usuario, password)
 		if valid_username(usuario) and valid_pass(password) and checked_verify:
 			usuario = str(usuario)
-			if validarUsuario(usuario):
+			if uniqueUser(usuario):#verdadero si el usuario es unico
 				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword)
 				a.put()
 				self.response.headers.add_header('Set-Cookie', 'name = %s; Path=/' %(usuario))
 				self.response.headers.add_header('Set-Cookie', 'pass = %s; Path=/' %(hpassword))
-				self.redirect('/main')
-		if not checked_verify:
+				self.redirect('/')
+			elif not uniqueUser(usuario):
+				errorUsuario = "El usuario ya existe"
+				self.renderNuevo(errorUsuario = errorUsuario, inombre = nombre, iapellido = apellido)
+		elif not checked_verify:
 			errorVerificacion = "Las claves no son iguales"
 			self.renderNuevo(errorVerif = errorVerificacion, inombre = nombre, iapellido = apellido, iusuario = usuario)
+		elif not valid_pass(password):
+			errorPass = "La clave debe ser mas compleja"
+			self.renderNuevo(errorPass = errorPass, inombre = nombre, iapellido = apellido, iusuario = usuario)
+		elif not valid_username(usuario):
+			errorUsuario = "El usuario debe ser mas largo"
+			self.renderNuevo(errorUsuario = errorUsuario, inombre = nombre, iapellido = apellido)
 
 class MainPage(Handler):
     def get(self):
