@@ -77,7 +77,7 @@ class Handler(webapp2.RequestHandler):
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
 
-class MotleyMensual(db.Model):
+class MontoMensual(db.Model):
 	deuda = db.IntegerProperty(required = True)
 	pago = db.IntegerProperty(required = True)
 	saldo = db.IntegerProperty(required = True)
@@ -89,14 +89,16 @@ class Pago(db.Model):
 	jugador = db.StringProperty(required = True)
 	monto = db.IntegerProperty(required = True)
 	descr = db.StringProperty()
+	equipo = db.StringProperty()
 
 class Jugadores (db.Model):
 	nombre = db.StringProperty(required = True)
 	apellido = db.StringProperty(required = True)
 	usuario = db.StringProperty(required = True)
 	password = db.StringProperty(required = True)
+	equipo = db.StringProperty()
 
-class Input(Handler):
+class Pago(Handler):
 	
 	def renderPagos(self, error = "" , ijugador = "" , imonto = "" , idescr = "" , errorJugador = ""):
 		self.render("pagos.html", error = error, ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)
@@ -104,7 +106,7 @@ class Input(Handler):
 	def get(self):
 		self.renderPagos()
 
-	def post(self):
+	def post(self,equipo):
 		ijugador = self.request.get("ijugador")
 		imonto = self.request.get("imonto")
 		idescr = self.request.get("idescripcion")
@@ -112,7 +114,7 @@ class Input(Handler):
 			for i in range(17):
 				if ijugador == Jugadores[i]:
 					intMonto = int(imonto)
-					p = Pago(jugador = ijugador, monto = intMonto, descr = idescr)
+					p = Pago(jugador = ijugador, monto = intMonto, descr = idescr, equipo = equipo)
 					p.put()
 					self.redirect('/')
 				else:
@@ -135,12 +137,16 @@ class Login(Handler):
 		password = self.request.get("ipassword")
 		x = db.GqlQuery("Select * from Jugadores where usuario= :1", usuario).get()
 		hashedPassword = x.password
+		uequipo = x.equipo
 		if loginCheck(usuario, password, hashedPassword):
-			self.redirect('/main')
+			self.redirect('/%s/main' %uequipo)
+		else:
+			errorUsuario = "La clave o el usuario ingresado son incorrectos"
+			self.render("login.html", errorUsuario = errorUsuario)
 
 class nuevoUsuario(Handler):
-	def renderNuevo(self, errorUsuario = "", errorVerif = "" , inombre = "" , iapellido = "" , iusuario = "" , ipass = "", iverif = "", errorPass = ""):
-		self.render("nuevo_usuario.html", errorUsuario = errorUsuario, errorVerif = errorVerif, inombre = inombre, iapellido = iapellido, iusuario = iusuario, ipass = ipass, iverif = iverif, errorPass = errorPass)
+	def renderNuevo(self, errorUsuario = "", errorVerif = "" , inombre = "" , iapellido = "" , iusuario = "" , ipass = "", iverif = "", errorPass = "", iequipo=""):
+		self.render("nuevo_usuario.html", errorUsuario = errorUsuario, errorVerif = errorVerif, inombre = inombre, iapellido = iapellido, iusuario = iusuario, ipass = ipass, iverif = iverif, errorPass = errorPass, iequipo = iequipo)
 
 	def get(self):
 		self.renderNuevo()
@@ -150,12 +156,13 @@ class nuevoUsuario(Handler):
 		usuario = escape(self.request.get('iusuario'))
 		password = escape(self.request.get('ipass'))
 		verify = escape(self.request.get('iverif'))
+		equipo = escape(self.request.get('iequipo'))
 		checked_verify = matched_password(password, verify)
 		hpassword = make_pw_hash(usuario, password)
 		if valid_username(usuario) and valid_pass(password) and checked_verify:
 			usuario = str(usuario)
 			if uniqueUser(usuario):#verdadero si el usuario es unico
-				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword)
+				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = equipo)
 				a.put()
 				self.response.headers.add_header('Set-Cookie', 'name = %s; Path=/' %(usuario))
 				self.response.headers.add_header('Set-Cookie', 'pass = %s; Path=/' %(hpassword))
@@ -174,7 +181,7 @@ class nuevoUsuario(Handler):
 			self.renderNuevo(errorUsuario = errorUsuario, inombre = nombre, iapellido = apellido)
 
 class MainPage(Handler):
-    def get(self):
+    def get(self, nombre_equipo):
 		# saldop = Pago(jugador = Jugadores[1], monto = 313, descr = "saldo de Pablo cuando deja de llevar las finanzas")
 		# saldof = Pago(jugador = Jugadores[2], monto = 20, descr = "saldo de Facu cuando Pablo dejo de llevar las finanzas")
 		# mov1 = Pago(jugador = Jugadores[15], monto = 50, descr = "Gastos del partido Gabi")
@@ -195,7 +202,7 @@ class MainPage(Handler):
 		# mov7.put()
 		#son todos pagos viejos que ya agregue asi que los comento para que no se dupliquen
 		cursorPago = db.GqlQuery("Select * from Pago order by fecha desc")
-		cursorMensual = db.GqlQuery("Select * from MotleyMensual order by mes desc")
+		cursorMensual = db.GqlQuery("Select * from MontoMensual order by mes desc")
 		deudaTotal = 0
 		pagosTotal = 0
 		saldoTotal = 0
@@ -203,6 +210,6 @@ class MainPage(Handler):
 			deudaTotal = deudaTotal + i.deuda
 			pagosTotal = pagosTotal + i.pago
 			saldoTotal = saldoTotal + i.saldo
-		self.render("front.html", cursorMensual = cursorMensual, cursorPago = cursorPago, deudaTotal = deudaTotal, pagosTotal = pagosTotal, saldoTotal = saldoTotal)
+		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo)
 
-app = webapp2.WSGIApplication([('/', Login),('/pago', Input),('/main', MainPage),('/nuevo_usuario', nuevoUsuario)], debug=True)
+app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/(\S+)/main', MainPage),('/nuevo_usuario', nuevoUsuario)], debug=True)
