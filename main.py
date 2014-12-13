@@ -33,8 +33,8 @@ USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 
 PASS_RE = re.compile(r"^.{3,20}$")
 
-Jugadores = dict([(0,'N/A'),(1,'Pablo'),(2,'Facu'),(3,'Agus B.'),(4,'Cesar'),(5,'Martin'),(6,'Seba'),(7,'Chino'),(8,'Marian'),(9,'Facu H.'),(10,'Jony'),
-	(11,'Alan'),(12,'Beli'),(13,'Diego'),(14,'Ryan'),(15,'Gabi'),(16,'Extra'),(17,'liga')])
+"""Jugadores = dict([(0,'N/A'),(1,'Pablo'),(2,'Facu'),(3,'Agus B.'),(4,'Cesar'),(5,'Martin'),(6,'Seba'),(7,'Chino'),(8,'Marian'),(9,'Facu H.'),(10,'Jony'),
+	(11,'Alan'),(12,'Beli'),(13,'Diego'),(14,'Ryan'),(15,'Gabi'),(16,'Extra'),(17,'liga')])"""
 
 def loginCheck(u,p,h):
 	salt = h.split('|')[1]
@@ -77,6 +77,9 @@ class Handler(webapp2.RequestHandler):
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
 
+class Equipos (db.Model):
+	nombre = db.StringProperty(required = True)
+	
 class MontoMensual(db.Model):
 	deuda = db.IntegerProperty(required = True)
 	pago = db.IntegerProperty(required = True)
@@ -89,14 +92,14 @@ class Pago(db.Model):
 	jugador = db.StringProperty(required = True)
 	monto = db.IntegerProperty(required = True)
 	descr = db.StringProperty()
-	equipo = db.StringProperty()
+	equipo = db.IntegerProperty()
 
 class Jugadores (db.Model):
 	nombre = db.StringProperty(required = True)
 	apellido = db.StringProperty(required = True)
 	usuario = db.StringProperty(required = True)
 	password = db.StringProperty(required = True)
-	equipo = db.StringProperty()
+	equipo = db.IntegerProperty(required = True)
 
 class Pago(Handler):
 	
@@ -139,7 +142,7 @@ class Login(Handler):
 		hashedPassword = x.password
 		uequipo = x.equipo
 		if loginCheck(usuario, password, hashedPassword):
-			self.redirect('/%s/main' %uequipo)
+			self.redirect('/main?eq=' + str(uequipo))
 		else:
 			errorUsuario = "La clave o el usuario ingresado son incorrectos"
 			self.render("login.html", errorUsuario = errorUsuario)
@@ -157,12 +160,16 @@ class nuevoUsuario(Handler):
 		password = escape(self.request.get('ipass'))
 		verify = escape(self.request.get('iverif'))
 		equipo = escape(self.request.get('iequipo'))
+		a = Equipos(nombre = equipo)
+		a.put()
+		id_equipo = a.key().id()
+		#pre_id = db.GqlQuery("SELECT * FROM EQUIPOS WHERE NOMBRE= :1", equipo).get()
 		checked_verify = matched_password(password, verify)
 		hpassword = make_pw_hash(usuario, password)
 		if valid_username(usuario) and valid_pass(password) and checked_verify:
 			usuario = str(usuario)
 			if uniqueUser(usuario):#verdadero si el usuario es unico
-				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = equipo)
+				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = id_equipo)
 				a.put()
 				self.response.headers.add_header('Set-Cookie', 'name = %s; Path=/' %(usuario))
 				self.response.headers.add_header('Set-Cookie', 'pass = %s; Path=/' %(hpassword))
@@ -181,7 +188,7 @@ class nuevoUsuario(Handler):
 			self.renderNuevo(errorUsuario = errorUsuario, inombre = nombre, iapellido = apellido)
 
 class MainPage(Handler):
-    def get(self, nombre_equipo):
+    def get(self):
 		# saldop = Pago(jugador = Jugadores[1], monto = 313, descr = "saldo de Pablo cuando deja de llevar las finanzas")
 		# saldof = Pago(jugador = Jugadores[2], monto = 20, descr = "saldo de Facu cuando Pablo dejo de llevar las finanzas")
 		# mov1 = Pago(jugador = Jugadores[15], monto = 50, descr = "Gastos del partido Gabi")
@@ -206,10 +213,17 @@ class MainPage(Handler):
 		deudaTotal = 0
 		pagosTotal = 0
 		saldoTotal = 0
+		nombre_equipo = self.request.get("eq")
 		for i in cursorMensual:
 			deudaTotal = deudaTotal + i.deuda
 			pagosTotal = pagosTotal + i.pago
 			saldoTotal = saldoTotal + i.saldo
 		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo)
 
-app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/(\S+)/main', MainPage),('/nuevo_usuario', nuevoUsuario)], debug=True)
+class Logout (Handler):
+	def get(self):
+		self.response.headers.add_header('Set-Cookie', 'name =; Path=/')
+		self.response.headers.add_header('Set-Cookie', 'pass =; Path=/')
+		self.redirect('/')
+
+app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout)], debug=True)

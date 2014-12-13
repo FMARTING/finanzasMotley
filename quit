@@ -1,0 +1,65 @@
+[33mcommit 048d5c2cde34425d83fbd08efcedffac988642cc[m
+Author: FMARTING <facundogomez15@gmail.com>
+Date:   Mon Dec 8 21:28:01 2014 -0300
+
+     On branch master
+     Changes to be committed:
+    	modified:   app.yaml
+    	new file:   images/logo_lifor.jpg
+    	modified:   main.py
+    	modified:   main.pyc
+    	modified:   templates/front.html
+    	modified:   templates/login.html
+    	modified:   templates/nuevo_usuario.html
+
+[33mcommit 464d6bdf19e12655953961c4b94f51e51a49e906[m
+Author: FMARTING <facundogomez15@gmail.com>
+Date:   Sat Dec 6 00:03:53 2014 -0300
+
+     On branch master
+     Changes to be committed:
+    	modified:   main.py
+    	modified:   main.pyc
+    	modified:   templates/nuevo_usuario.html
+
+[33mcommit 8fccb4f2817291143b64a5e648ff4358032e4900[m
+Author: FMARTING <facundogomez15@gmail.com>
+Date:   Sat Nov 29 13:06:49 2014 -0300
+
+     On branch master
+     Changes to be committed:
+    	modified:   main.py
+    	modified:   main.pyc
+    	modified:   templates/nuevo_usuario.html
+
+[33mcommit dcd695e3d71e74e5595830d70d2489cad9d30442[m
+Author: FMARTING <facundogomez15@gmail.com>
+Date:   Sat Nov 29 12:33:21 2014 -0300
+
+     On branch master
+     Changes to be committed:
+    	modified:   main.py
+    	modified:   main.pyc
+    	modified:   templates/login.html
+    	new file:   templates/nuevo_usuario.html
+
+[33mcommit 6379eeb42deb8a3976745cdde0fc4776db0cd1b4[m
+Author: FMARTING <facundogomez15@gmail.com>
+Date:   Sat Nov 29 11:53:33 2014 -0300
+
+     On branch master
+     Changes to be committed:
+    	new file:   app.yaml
+    	new file:   favicon.ico
+    	new file:   index.yaml
+    	new file:   main.py
+    	new file:   main.pyc
+    	new file:   templates/front.html
+    	new file:   templates/login.html
+    	new file:   templates/pagos.html
+
+[33mcommit a2a484d6ea3e87bc516ee5b93f6b1027a2a403fa[m
+Author: Facundo <FMARTING@users.noreply.github.com>
+Date:   Sat Nov 29 10:55:30 2014 -0300
+
+    Initial commit

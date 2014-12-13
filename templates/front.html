@@ -62,7 +62,7 @@
 					<td><strong>PAGO</strong></td>
 					<td><strong>DESCRIPCION</strong></td>
 				</tr>
-		{% for i in cursorPago %}
+				{% for i in cursorPago %}
 				<tr>
 					<td>{{i.fecha}}</td>
 					<td>{{i.jugador}}</td>
@@ -73,6 +73,11 @@
 					{% endif %}
 					<td>{{i.descr}}</td>
 				</tr>
-		{% endfor %}
+				{% endfor %}
+			</table>
+		<div>
+			<br>
+			<a href="/logout">Cerrá tu sesión</a>
+		</div>
 	</body>
 </html>
