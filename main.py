@@ -163,7 +163,6 @@ class nuevoUsuario(Handler):
 		a = Equipos(nombre = equipo)
 		a.put()
 		id_equipo = a.key().id()
-		#pre_id = db.GqlQuery("SELECT * FROM EQUIPOS WHERE NOMBRE= :1", equipo).get()
 		checked_verify = matched_password(password, verify)
 		hpassword = make_pw_hash(usuario, password)
 		if valid_username(usuario) and valid_pass(password) and checked_verify:
@@ -213,7 +212,9 @@ class MainPage(Handler):
 		deudaTotal = 0
 		pagosTotal = 0
 		saldoTotal = 0
-		nombre_equipo = self.request.get("eq")
+		equipo = self.request.get("eq")
+		x = Equipos.get_by_id(int(equipo))
+		nombre_equipo = str(x.nombre)
 		for i in cursorMensual:
 			deudaTotal = deudaTotal + i.deuda
 			pagosTotal = pagosTotal + i.pago
