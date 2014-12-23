@@ -22,12 +22,15 @@ import cgi
 import random
 import string
 import hashlib
+import time
+import datetime
+import calendar
 
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), extensions = ['jinja2.ext.autoescape'], autoescape = True)
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 
@@ -141,8 +144,11 @@ class Login(Handler):
 		x = db.GqlQuery("Select * from Jugadores where usuario= :1", usuario).get()
 		hashedPassword = x.password
 		uequipo = x.equipo
+		fecha_actual = datetime.datetime.today()
+		year = fecha_actual.year
+		month = fecha_actual.month
 		if loginCheck(usuario, password, hashedPassword):
-			self.redirect('/main?eq=' + str(uequipo))
+			self.redirect('/main?eq=' + str(uequipo) + "&y=" + str(year) + "&m=" + str(month))
 		else:
 			errorUsuario = "La clave o el usuario ingresado son incorrectos"
 			self.render("login.html", errorUsuario = errorUsuario)
@@ -213,13 +219,16 @@ class MainPage(Handler):
 		pagosTotal = 0
 		saldoTotal = 0
 		equipo = self.request.get("eq")
+		year = int(self.request.get("y"))
 		x = Equipos.get_by_id(int(equipo))
 		nombre_equipo = str(x.nombre)
+		htmlcal = calendar.HTMLCalendar(calendar.MONDAY)
+		cal =  htmlcal.formatyear(year)
 		for i in cursorMensual:
 			deudaTotal = deudaTotal + i.deuda
 			pagosTotal = pagosTotal + i.pago
 			saldoTotal = saldoTotal + i.saldo
-		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo)
+		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo, cal = cal)
 
 class Logout (Handler):
 	def get(self):
