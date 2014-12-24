@@ -148,7 +148,7 @@ class Login(Handler):
 		year = fecha_actual.year
 		month = fecha_actual.month
 		if loginCheck(usuario, password, hashedPassword):
-			self.redirect('/main?eq=' + str(uequipo) + "&y=" + str(year) + "&m=" + str(month))
+			self.redirect('/main?eq=' + str(uequipo) + "&y=" + str(year))
 		else:
 			errorUsuario = "La clave o el usuario ingresado son incorrectos"
 			self.render("login.html", errorUsuario = errorUsuario)
