@@ -144,10 +144,13 @@ class Login(Handler):
 		x = db.GqlQuery("Select * from Jugadores where usuario= :1", usuario).get()
 		hashedPassword = x.password
 		uequipo = x.equipo
+		ujugador = x.key().id()
 		fecha_actual = datetime.datetime.today()
 		year = fecha_actual.year
 		month = fecha_actual.month
 		if loginCheck(usuario, password, hashedPassword):
+			self.response.headers.add_header('Set-Cookie', 'equipo = %s; Path=/' %(uequipo))
+			self.response.headers.add_header('Set-Cookie', 'jugador = %s; Path=/' %(str(ujugador)))
 			self.redirect('/main?eq=' + str(uequipo) + "&y=" + str(year))
 		else:
 			errorUsuario = "La clave o el usuario ingresado son incorrectos"

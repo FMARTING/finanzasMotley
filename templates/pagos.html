@@ -15,7 +15,13 @@
 			<label>
 			
 			<div>Jugador</div>
-			<input type="text" name = "ijugador" value={{ijugador}} >
+				<div class="radio">  
+					<input id="propio" type="radio" name="pjugador" value="propio">  
+					<label for="propio">Propio</label>  
+					<input id="otro" type="radio" name="pjugador" value="otro">  
+					<label for="otro" onclick="var input = document.getElementById('otro'); if(this.checked){ input.disabled = false; input.focus();}else{input.disabled=true;}"  />Otro</label>
+				</div>
+			<input type="text" id = "otro" " name = "ijugador" value={{ijugador}} >
 			<div class="error">{{errorJugador}}</div>
 			
 			</label>
