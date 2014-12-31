@@ -25,8 +25,11 @@ import hashlib
 import time
 import datetime
 import calendar
-#hay un problema con el post de un pago, REVISARLO!!!!
 
+"""Desarrollar la parte de calcular la cantidad de fines de semana en cada mes, que se puedan confirmar los fines de semana que se jugaron y los que no para definir
+los costos de partido por mes. Tambien que se puedan ingresar los montos pagados por inscripcion, gastos administrativos y otros gastos mensuales
+Por ultimo con toda esta informacion que se muestre un resumen por jugador por mes de cada jugador con debe y haber
+"""
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
