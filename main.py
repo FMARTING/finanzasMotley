@@ -25,6 +25,7 @@ import hashlib
 import time
 import datetime
 import calendar
+#hay un problema con el post de un pago, REVISARLO!!!!
 
 from google.appengine.ext import db
 
@@ -90,12 +91,12 @@ class MontoMensual(db.Model):
 	mes = db.IntegerProperty(required = True)
 	ano = db.IntegerProperty(required = True)
 
-class Pago(db.Model):
-	fecha = db.DateTimeProperty(auto_now_add = True)
-	jugador = db.StringProperty(required = True)
+class Pagos(db.Model):
+	Nombre = db.StringProperty(required = True)
 	monto = db.IntegerProperty(required = True)
-	descr = db.StringProperty()
-	equipo = db.IntegerProperty()
+	comentario = db.StringProperty(required = True)
+	Equipo = db.IntegerProperty(required = True)
+	fecha = db.DateTimeProperty(auto_now_add = True)
 
 class Jugadores (db.Model):
 	nombre = db.StringProperty(required = True)
@@ -112,25 +113,43 @@ class Pago(Handler):
 	def get(self):
 		self.renderPagos()
 
-	def post(self,equipo):
+	def post(self):
 		ijugador = self.request.get("ijugador")
 		imonto = self.request.get("imonto")
 		idescr = self.request.get("idescripcion")
-		if ijugador and imonto and idescr:
-			for i in range(17):
-				if ijugador == Jugadores[i]:
-					intMonto = int(imonto)
-					p = Pago(jugador = ijugador, monto = intMonto, descr = idescr, equipo = equipo)
+		titular_pago = self.request.get("pjugador")
+		user = Jugadores.get_by_id(int(self.request.cookies.get('jugador',0)))
+		userNombre = str(user.nombre)
+		user_equipo_id = self.request.cookies.get('equipo',0)
+		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
+		user_equipo = equipo.nombre
+		if imonto and idescr:
+			if titular_pago == "otro":
+				if not ijugador:
+					errorJugador = "No ingresaste un jugador valido"
+					self.renderPagos(ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)
+				if ijugador:
+					user_monto = int(imonto)
+					user_nombre = str(ijugador)
+					user_comentario = str(idescr)
+					nPago = Pagos(Nombre = user_nombre, monto = user_monto, comentario = user_comentario, Equipo = int(user_equipo_id))
+					nPago.put()
+					self.redirect('/main')
+				else:
+					errorJugador = "Hubo un problema, contactate con Facu"
+					self.renderPagos(ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)
+			elif titular_pago == "propio":
+				if imonto and idescr:
+					monto = int(imonto)
+					p = Pagos(nombre = ijugador, monto = monto, descr = idescr, equipo = user_equipo)
 					p.put()
 					self.redirect('/')
 				else:
-					errorJugador = "el jugador no se encuentra registrado, comunicate con Facu"
-					self.renderPagos(ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)
-					break
-			# intMonto = int(imonto)
-			# p = Pago(jugador = ijugador, monto = intMonto, descr = idescr)
-			# p.put()
-			# self.redirect('/')
+					errorJugador = "Hubo un problema, saca un screenshot y habla con Facu"
+					self.renderPagos(ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)	
+			else:
+				errorJugador = "Hubo un problema, saca un screenshot y habla con Facu"
+				self.renderPagos(ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)
 		else:
 			error = "Todas las cajas deben completarse"
 			self.renderPagos(ijugador = ijugador, imonto = imonto, idescr = idescr, error = error)
@@ -142,19 +161,24 @@ class Login(Handler):
 		usuario = self.request.get("iusuario")
 		password = self.request.get("ipassword")
 		x = db.GqlQuery("Select * from Jugadores where usuario= :1", usuario).get()
-		hashedPassword = x.password
-		uequipo = x.equipo
-		ujugador = x.key().id()
+		if x:
+			hashedPassword = x.password
+			uequipo = x.equipo
+			id_jugador = x.key().id()
 		fecha_actual = datetime.datetime.today()
 		year = fecha_actual.year
 		month = fecha_actual.month
-		if loginCheck(usuario, password, hashedPassword):
+		if not x:
+			errorUsuario = "La clave o el usuario ingresado son incorrectos"
+			self.render("login.html", errorUsuario = errorUsuario, ijugador = usuario)
+		elif loginCheck(usuario, password, hashedPassword):
 			self.response.headers.add_header('Set-Cookie', 'equipo = %s; Path=/' %(uequipo))
-			self.response.headers.add_header('Set-Cookie', 'jugador = %s; Path=/' %(str(ujugador)))
-			self.redirect('/main?eq=' + str(uequipo) + "&y=" + str(year))
+			self.response.headers.add_header('Set-Cookie', 'jugador = %s; Path=/' %(str(id_jugador)))
+			self.response.headers.add_header('Set-Cookie', 'fecha = %s; Path=/' %(str(year)))
+			self.redirect('/main')
 		else:
 			errorUsuario = "La clave o el usuario ingresado son incorrectos"
-			self.render("login.html", errorUsuario = errorUsuario)
+			self.render("login.html", errorUsuario = errorUsuario, ijugador = usuario)
 
 class nuevoUsuario(Handler):
 	def renderNuevo(self, errorUsuario = "", errorVerif = "" , inombre = "" , iapellido = "" , iusuario = "" , ipass = "", iverif = "", errorPass = "", iequipo=""):
@@ -197,32 +221,13 @@ class nuevoUsuario(Handler):
 
 class MainPage(Handler):
     def get(self):
-		# saldop = Pago(jugador = Jugadores[1], monto = 313, descr = "saldo de Pablo cuando deja de llevar las finanzas")
-		# saldof = Pago(jugador = Jugadores[2], monto = 20, descr = "saldo de Facu cuando Pablo dejo de llevar las finanzas")
-		# mov1 = Pago(jugador = Jugadores[15], monto = 50, descr = "Gastos del partido Gabi")
-		# mov2 = Pago(jugador = Jugadores[5], monto = 420, descr = "Pago de Martin N para ponerse al dia")
-		# mov3 = Pago(jugador = Jugadores[17], monto = -450, descr = "Pago gastos de partido")
-		# mov4 = Pago(jugador = Jugadores[12], monto = 300, descr = "Pago Beli 5 de Octubre")
-		# mov5 = Pago(jugador = Jugadores[15], monto = 50, descr = "Gastos del partido Gabi")
-		# mov6 = Pago(jugador = Jugadores[11], monto = 100, descr = "Gastos Octubre Alan")
-		# mov7 = Pago(jugador = Jugadores[17], monto = -450, descr = "Pago gastos de partido")
-		# saldop.put()
-		# saldof.put()
-		# mov1.put()
-		# mov2.put()
-		# mov3.put()
-		# mov4.put()
-		# mov5.put()
-		# mov6.put()
-		# mov7.put()
-		#son todos pagos viejos que ya agregue asi que los comento para que no se dupliquen
-		cursorPago = db.GqlQuery("Select * from Pago order by fecha desc")
+		cursorPago = db.GqlQuery("Select * from Pagos order by fecha desc")
 		cursorMensual = db.GqlQuery("Select * from MontoMensual order by mes desc")
 		deudaTotal = 0
 		pagosTotal = 0
 		saldoTotal = 0
-		equipo = self.request.get("eq")
-		year = int(self.request.get("y"))
+		equipo = self.request.cookies.get('equipo',0)
+		year = int(self.request.cookies.get('fecha',0))
 		x = Equipos.get_by_id(int(equipo))
 		nombre_equipo = str(x.nombre)
 		htmlcal = calendar.HTMLCalendar(calendar.MONDAY)

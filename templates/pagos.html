@@ -3,7 +3,6 @@
 <html>
 	<head>
 		<title>Finanzas MOTLEY</title>
-		<script src="myscripts.js"></script>
 	</head>
 	<style type="text/css">
 		.error {
@@ -16,13 +15,13 @@
 			<label>
 			
 			<div>Jugador</div>
-				<div class="radio">  
+				<div class="radio"> 
 					<input id="propio" type="radio" name="pjugador" value="propio">  
 					<label for="propio">Propio</label>  
 					<input id="otro" type="radio" name="pjugador" value="otro">  
-					<label for="otro" onclick="var input = document.getElementById('otro'); if(this.checked){ input.disabled = false; input.focus();}else{input.disabled=true;}"  />Otro</label>
+					<label for="otro">Otro</label>
 				</div>
-			<input type="text" id = "otro" " name = "ijugador" value={{ijugador}} >
+			<input type="text" name="ijugador" value={{ijugador}} >
 			<div class="error">{{errorJugador}}</div>
 			
 			</label>

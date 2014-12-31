@@ -82,13 +82,13 @@
 							{% for i in cursorPago %}
 							<tr>
 								<td>{{i.fecha}}</td>
-								<td>{{i.jugador}}</td>
+								<td>{{i.nombre}}</td>
 								{% if i.monto <0 %}
 								<td style="color:red">{{i.monto}}</td>
 								{% else %}
 								<td style="color:blue">{{i.monto}}</td>
 								{% endif %}
-								<td>{{i.descr}}</td>
+								<td>{{i.comentario}}</td>
 							</tr>
 							{% endfor %}
 						</table>
