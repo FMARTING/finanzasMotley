@@ -37,9 +37,6 @@ USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 
 PASS_RE = re.compile(r"^.{3,20}$")
 
-"""Jugadores = dict([(0,'N/A'),(1,'Pablo'),(2,'Facu'),(3,'Agus B.'),(4,'Cesar'),(5,'Martin'),(6,'Seba'),(7,'Chino'),(8,'Marian'),(9,'Facu H.'),(10,'Jony'),
-	(11,'Alan'),(12,'Beli'),(13,'Diego'),(14,'Ryan'),(15,'Gabi'),(16,'Extra'),(17,'liga')])"""
-
 def loginCheck(u,p,h):
 	salt = h.split('|')[1]
 	return h == make_pw_hash(u,p,salt)
@@ -92,10 +89,10 @@ class MontoMensual(db.Model):
 	ano = db.IntegerProperty(required = True)
 
 class Pagos(db.Model):
-	Nombre = db.StringProperty(required = True)
+	nombre = db.StringProperty(required = True)
 	monto = db.IntegerProperty(required = True)
 	comentario = db.StringProperty(required = True)
-	Equipo = db.IntegerProperty(required = True)
+	equipo = db.IntegerProperty(required = True)
 	fecha = db.DateTimeProperty(auto_now_add = True)
 
 class Jugadores (db.Model):
@@ -107,11 +104,14 @@ class Jugadores (db.Model):
 
 class Pago(Handler):
 	
-	def renderPagos(self, error = "" , ijugador = "" , imonto = "" , idescr = "" , errorJugador = ""):
-		self.render("pagos.html", error = error, ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)
+	def renderPagos(self, error = "" , ijugador = "" , imonto = "" , idescr = "" , errorJugador = "", equipo = ""):
+		self.render("pagos.html", error = error, ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador, equipo = equipo)
 
 	def get(self):
-		self.renderPagos()
+		user_equipo_id = self.request.cookies.get('equipo',0)
+		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
+		user_equipo = str(equipo.nombre)
+		self.renderPagos(equipo = user_equipo.upper())
 
 	def post(self):
 		ijugador = self.request.get("ijugador")
@@ -119,7 +119,7 @@ class Pago(Handler):
 		idescr = self.request.get("idescripcion")
 		titular_pago = self.request.get("pjugador")
 		user = Jugadores.get_by_id(int(self.request.cookies.get('jugador',0)))
-		userNombre = str(user.nombre)
+		user_nombre = str(user.nombre)
 		user_equipo_id = self.request.cookies.get('equipo',0)
 		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
 		user_equipo = equipo.nombre
@@ -132,7 +132,7 @@ class Pago(Handler):
 					user_monto = int(imonto)
 					user_nombre = str(ijugador)
 					user_comentario = str(idescr)
-					nPago = Pagos(Nombre = user_nombre, monto = user_monto, comentario = user_comentario, Equipo = int(user_equipo_id))
+					nPago = Pagos(nombre = user_nombre, monto = user_monto, comentario = user_comentario, equipo = int(user_equipo_id))
 					nPago.put()
 					self.redirect('/main')
 				else:
@@ -140,10 +140,11 @@ class Pago(Handler):
 					self.renderPagos(ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)
 			elif titular_pago == "propio":
 				if imonto and idescr:
-					monto = int(imonto)
-					p = Pagos(nombre = ijugador, monto = monto, descr = idescr, equipo = user_equipo)
-					p.put()
-					self.redirect('/')
+					user_monto = int(imonto)
+					user_comentario = str(idescr)
+					nPago = Pagos(nombre = user_nombre, monto = user_monto, comentario = user_comentario, equipo = int(user_equipo_id))
+					nPago.put()
+					self.redirect('/main')
 				else:
 					errorJugador = "Hubo un problema, saca un screenshot y habla con Facu"
 					self.renderPagos(ijugador = ijugador, imonto = imonto, idescr = idescr, errorJugador = errorJugador)	
@@ -221,17 +222,17 @@ class nuevoUsuario(Handler):
 
 class MainPage(Handler):
     def get(self):
-		cursorPago = db.GqlQuery("Select * from Pagos order by fecha desc")
-		cursorMensual = db.GqlQuery("Select * from MontoMensual order by mes desc")
+		equipo = self.request.cookies.get('equipo',0)
 		deudaTotal = 0
 		pagosTotal = 0
 		saldoTotal = 0
-		equipo = self.request.cookies.get('equipo',0)
 		year = int(self.request.cookies.get('fecha',0))
 		x = Equipos.get_by_id(int(equipo))
 		nombre_equipo = str(x.nombre)
 		htmlcal = calendar.HTMLCalendar(calendar.MONDAY)
 		cal =  htmlcal.formatyear(year)
+		cursorPago = db.GqlQuery("Select * from Pagos where equipo = %s order by fecha desc" %(str(equipo)))
+		cursorMensual = db.GqlQuery("Select * from MontoMensual order by mes desc")
 		for i in cursorMensual:
 			deudaTotal = deudaTotal + i.deuda
 			pagosTotal = pagosTotal + i.pago
