@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<!-- falta agregarle el javascript para que se habilite la caja solo cuando elijo otro, lo que esta puesto esta mal-->
+
 <html>
 	<head>
 		<title>Finanzas {{equipo}}</title>
@@ -10,18 +10,18 @@
 		}
 	</style>
 	<body>
-		<form method = "post">
+		<form id="myForm" method = "post">
 			<h1><strong>PAGOS DE {{equipo}}</strong></h1>
 			<label>
 			
 			<div>Jugador</div>
 				<div class="radio"> 
-					<input id="propio" type="radio" name="pjugador" value="propio">  
+					<input class="propio" id="propio" type="radio" name="pjugador" value="propio">  
 					<label for="propio">Propio</label>  
-					<input id="otro" type="radio" name="pjugador" value="otro">  
+					<input class="otro" id="otro" type="radio" name="pjugador" value="otro">
 					<label for="otro">Otro</label>
 				</div>
-			<input type="text" name="ijugador" value={{ijugador}} >
+			<input class="jugador" type="text" name="ijugador" value={{ijugador}} >
 			<div class="error">{{errorJugador}}</div>
 			
 			</label>
@@ -45,5 +45,7 @@
 			<input type="submit">
 			
 		</form>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="/script/pagos_script.js" type="text/javascript" ></script>
 	</body>
 </html>
