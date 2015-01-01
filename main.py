@@ -240,7 +240,9 @@ class MainPage(Handler):
 			deudaTotal = deudaTotal + i.deuda
 			pagosTotal = pagosTotal + i.pago
 			saldoTotal = saldoTotal + i.saldo
-		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo, cal = cal)
+		#calcular la cantidad de fines de semana en el mes
+		domingos = str(len([1 for i in calendar.monthcalendar(year, datetime.datetime.today().month) if i[6] != 0]))
+		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo, cal = cal, Domingos = domingos)
 
 class Logout (Handler):
 	def get(self):
