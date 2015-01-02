@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+
+<html>
+	<style type="text/css">
+	.label {
+		display: inline-block;
+		margin-right: 10px;
+	}
+	input {
+		
+	}
+	</style>
+	<head>
+		<title>Gastos fijos de {{equipo}}</title>
+	</head>
+	<body>
+		<h1>Gastos fijos de {{equipo}}</h1>
+		<p>Cantidad de jugadores: {{cantidad_jugadores}}</p>
+		<p>Total de gastos anuales: {{gastos_total}}</p>
+		<p>Total de gastos por jugador en el año: {{gastos_total_ano}}</p>
+		<p>Total de gastos por jugador por mes: {{gastos_total_mes}}</p>
+		<br>
+		<form>
+			<p class="label">Gastos de inscripcion (total del año):</p>
+			<input type="text" name="gastos_inscr" value={{gastos_inscr}} >
+			<br>
+			<p class="label">Gastos administrativos por mes:</p>
+			<input type="text" name="gastos_admin" value={{gastos_admin}} >
+			<br>
+			<p class="label">Otros gastos (total del año):</p>
+			<input type="text" name="gastos_otros" value={{gastos_otros}} >
+			<br>
+			<input type="submit" id="ingresar_gastos" value="Guardar">
+		</form>
+		<div>
+			<br>
+			<a href="/main" style="clear: both">Hace click aqui para volver a la pagina principal</a>
+			<br>
+			<br>
+			<a href="/logout" style="clear: both">Hace click aqui para cerrar tu sesion</a>
+		</div>
+	</body>
+</html>

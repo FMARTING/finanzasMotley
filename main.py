@@ -248,6 +248,13 @@ class Logout (Handler):
 	def get(self):
 		self.response.headers.add_header('Set-Cookie', 'name =; Path=/')
 		self.response.headers.add_header('Set-Cookie', 'pass =; Path=/')
+		self.response.headers.add_header('Set-Cookie', 'equipo =; Path=/')
+		self.response.headers.add_header('Set-Cookie', 'fecha =; Path=/')
+		self.response.headers.add_header('Set-Cookie', 'jugador =; Path=/')
 		self.redirect('/')
+		
+class GastosF (Handler):
+	def get(self):
+		self.render('gastos_fijos.html')
 
-app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout)], debug=True)
+app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout),('/gastos_f', GastosF)], debug=True)
