@@ -17,16 +17,3 @@ var text_analyzer = function() {
 
 $(document).ready(main);
 $(":radio").on("change", text_analyzer);
-/*
-<script>
-$( "form" ).submit(function( event ) {
-  if ( $( "input:first" ).val() === "correct" ) {
-    $( "span" ).text( "Validated..." ).show();
-    return;
-  }
- 
-  $( "span" ).text( "Not valid!" ).show().fadeOut( 1000 );
-  event.preventDefault();
-});
-</script>
-*/
