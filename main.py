@@ -50,6 +50,27 @@ def uniqueUser(nombre): # Si el usuario es unico devuelve Verdadero
 		return False
 	return True
 
+def uniqueEquipo(nombre): # Si el equipo es unico devuelve Verdadero
+	x = db.GqlQuery("Select * from Equipos where nombre= :1", nombre).get()
+	if x:
+		return False
+	return True
+
+def idEquipo(equipo): #devuelve el id del equipo del nuevo usuario, si ya existe del equipo existente, sino del nuevo equipo
+	if uniqueEquipo(equipo):
+		a = Equipos(nombre = equipo)
+		a.put()
+		return a.key().id()
+	else:
+		return db.GqlQuery("Select * from Equipos where nombre= :1", equipo).get().key().id()
+
+def tamano_equipo(equipo):
+	x = db.GqlQuery("Select * from Jugadores where equipo= :1", equipo).fetch(None)
+	cantidad_jugadores = 0
+	for i in x:
+		cantidad_jugadores +=1
+	return cantidad_jugadores
+	
 def make_salt():
     return ''.join(random.choice(string.letters) for x in xrange(5))
 
@@ -83,6 +104,10 @@ class Handler(webapp2.RequestHandler):
 
 class Equipos (db.Model):
 	nombre = db.StringProperty(required = True)
+	gastos_total = db.IntegerProperty()
+	gastos_inscr = db.IntegerProperty()
+	gastos_admin = db.IntegerProperty()
+	gastos_otros = db.IntegerProperty()
 	
 class MontoMensual(db.Model):
 	deuda = db.IntegerProperty(required = True)
@@ -197,14 +222,12 @@ class nuevoUsuario(Handler):
 		password = escape(self.request.get('ipass'))
 		verify = escape(self.request.get('iverif'))
 		equipo = escape(self.request.get('iequipo'))
-		a = Equipos(nombre = equipo)
-		a.put()
-		id_equipo = a.key().id()
 		checked_verify = matched_password(password, verify)
 		hpassword = make_pw_hash(usuario, password)
 		if valid_username(usuario) and valid_pass(password) and checked_verify:
 			usuario = str(usuario)
 			if uniqueUser(usuario):#verdadero si el usuario es unico
+				id_equipo = idEquipo(equipo)
 				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = id_equipo)
 				a.put()
 				self.response.headers.add_header('Set-Cookie', 'name = %s; Path=/' %(usuario))
@@ -242,7 +265,7 @@ class MainPage(Handler):
 			saldoTotal = saldoTotal + i.saldo
 		#calcular la cantidad de fines de semana en el mes
 		domingos = str(len([1 for i in calendar.monthcalendar(year, datetime.datetime.today().month) if i[6] != 0]))
-		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo, cal = cal, Domingos = domingos)
+		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo, cal = cal)
 
 class Logout (Handler):
 	def get(self):
@@ -252,9 +275,33 @@ class Logout (Handler):
 		self.response.headers.add_header('Set-Cookie', 'fecha =; Path=/')
 		self.response.headers.add_header('Set-Cookie', 'jugador =; Path=/')
 		self.redirect('/')
-		
-class GastosF (Handler):
-	def get(self):
-		self.render('gastos_fijos.html')
 
+class GastosF (Handler):
+	def renderGastosF(self, equipo = "", cantidad_jugadores = "", gastos_total = "", gastos_jug_ano = "", gastos_jug_mes = "", gastos_inscr = "", gastos_admin="", gastos_otros = ""):
+		self.render("gastos_fijos.html", equipo = equipo, cantidad_jugadores = cantidad_jugadores, gastos_total = gastos_total, gastos_jug_ano = gastos_jug_ano, gastos_jug_mes = gastos_jug_mes, gastos_inscr = gastos_inscr, gastos_admin = gastos_admin, gastos_otros = gastos_otros)
+
+	def get(self):
+		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
+		equipo_id = equipo.key().id()
+		user_equipo = equipo.nombre
+		cantidad_jugadores = tamano_equipo(equipo_id)
+		gastos_total = 0
+		gastos_inscr = 0
+		gastos_admin = 0
+		gastos_otros = 0
+		if equipo.gastos_total != None:
+			gastos_total = equipo.gastos_total
+		if equipo.gastos_inscr !=None:
+			gastos_inscr = equipo.gastos_inscr
+		if equipo.gastos_admin !=None:
+			gastos_admin = equipo.gastos_admin
+		if equipo.gastos_otros !=None:
+			gastos_otros = equipo.gastos_otros
+		gastos_jug_ano = gastos_total/cantidad_jugadores
+		gastos_jug_mes = gastos_jug_ano/12
+		self.renderGastosF(equipo = user_equipo, cantidad_jugadores = cantidad_jugadores, gastos_total = gastos_total, gastos_jug_ano = gastos_jug_ano, gastos_jug_mes = gastos_jug_mes, gastos_inscr = gastos_inscr, gastos_admin = gastos_admin, gastos_otros = gastos_otros)
+		
+	def post(self):
+		
+		
 app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout),('/gastos_f', GastosF)], debug=True)

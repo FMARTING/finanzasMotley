@@ -6,9 +6,6 @@
 		display: inline-block;
 		margin-right: 10px;
 	}
-	input {
-		
-	}
 	</style>
 	<head>
 		<title>Gastos fijos de {{equipo}}</title>
@@ -17,8 +14,8 @@
 		<h1>Gastos fijos de {{equipo}}</h1>
 		<p>Cantidad de jugadores: {{cantidad_jugadores}}</p>
 		<p>Total de gastos anuales: {{gastos_total}}</p>
-		<p>Total de gastos por jugador en el año: {{gastos_total_ano}}</p>
-		<p>Total de gastos por jugador por mes: {{gastos_total_mes}}</p>
+		<p>Total de gastos por jugador en el año: {{gastos_jug_ano}}</p>
+		<p>Total de gastos por jugador por mes: {{gastos_jug_mes}}</p>
 		<br>
 		<form>
 			<p class="label">Gastos de inscripcion (total del año):</p>
@@ -30,7 +27,7 @@
 			<p class="label">Otros gastos (total del año):</p>
 			<input type="text" name="gastos_otros" value={{gastos_otros}} >
 			<br>
-			<input type="submit" id="ingresar_gastos" value="Guardar">
+			<input type="submit" id="ingresar_gastos" value="Guardar informacion de gastos">
 		</form>
 		<div>
 			<br>
