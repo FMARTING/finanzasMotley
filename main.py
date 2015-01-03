@@ -302,6 +302,17 @@ class GastosF (Handler):
 		self.renderGastosF(equipo = user_equipo, cantidad_jugadores = cantidad_jugadores, gastos_total = gastos_total, gastos_jug_ano = gastos_jug_ano, gastos_jug_mes = gastos_jug_mes, gastos_inscr = gastos_inscr, gastos_admin = gastos_admin, gastos_otros = gastos_otros)
 		
 	def post(self):
-		
+		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
+		equipo_id = equipo.key().id()
+		gastos_inscr = self.request.get("gastos_inscr")
+		gastos_admin = self.request.get("gastos_admin")
+		gastos_otros = self.request.get("gastos_otros")
+		gastos_total = int(gastos_inscr) + int(gastos_admin) + int(gastos_otros)
+		equipo.gastos_inscr = int(gastos_inscr)
+		equipo.gastos_admin = int(gastos_admin)
+		equipo.gastos_otros = int(gastos_otros)
+		equipo.gastos_total = int(gastos_total)
+		equipo.put()
+		self.redirect('/main')		
 		
 app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout),('/gastos_f', GastosF)], debug=True)
