@@ -18,16 +18,18 @@
 				<p style="display:inline">Selecciona el mes:</p>
 				<select>
 					{% for i in range(1,13)%}
-					<option value="{{i}}">{{i}}</option>
+					<option name="mes"value="{{i}}">{{i}}</option>
 					{% endfor %}
 				</select>
+				<br>
+				<br>
 				<table>
 					<tr>
-						<td>Dia</td>
+						<td>Partido del mes</td>
 						<td>Gastos (ingresa el pago)</td>
 						<td>Jugadores</td>
 					</tr>
-					{% for i in range(1,13) %}
+					{% for i in range(1,11) %}
 					<tr>
 						<td>{{i}}</td>
 						<td><input type="text" name="{{i}}Gastos_p" value="{{iGastos_p}}"></td>
