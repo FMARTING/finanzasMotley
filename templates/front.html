@@ -3,26 +3,15 @@
 <html>
 	<head>
 		<title>Finanzas {{equipo}}</title>
+		<link href="styles/front_style.css" rel="stylesheet">
 	</head>
-	
-	<style type="text/css">
-	table, td {
-	border: 1px solid black;
-	text-align: center;
-	table-layout: auto;
-	}
-	#B_Izquierda{
-	margin-right:100px;
-	border:1px;
-	width: 50%
-	}
-	#B_Derecha{
-	float: right;
-	width: 50%;
-	border:1px;
-	}
-	</style>
 	<body>
+		<div>
+				<a href="/pago" class="myButton">Ingresar un pago</a>
+				<a href="/gastos_f" class="myButton">Revisar los gastos fijos de tu equipo</a>
+				<a href="/gastos_p" class="myButton">Revisar los gastos por partido de tu equipo</a>
+				<a href="/logout" class="myButton">Cerrar tu sesión</a>
+		</div>
 		<h1> Finanzas generales de {{equipo}} </h1>
 			<div id="B_Derecha">
 				{% autoescape false %}
@@ -105,26 +94,5 @@
 					</table>
 				</div>
 			</div>
-			
-			<div>
-				<br>
-				<a href="/pago" style="clear: both">Ingresa un pago</a>
-			</div>
-			
-			<div>
-				<br>
-				<a href="/gastos_f" style="clear: both">Revisa los gastos fijos de tu equipo</a>
-			</div>
-			
-			<div>
-				<br>
-				<a href="/gastos_p" style="clear: both">Revisa los gastos por partido de tu equipo</a>
-			</div>
-			
-			<div>
-				<br>
-				<a href="/logout" style="clear: both">Cerrá tu sesión</a>
-			</div>
-			
 	</body>
 </html>

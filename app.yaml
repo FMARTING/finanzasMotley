@@ -8,6 +8,9 @@ handlers:
 - url: /script
   static_dir: script
 
+- url: /styles
+  static_dir: styles
+
 - url: /images
   static_dir: images
 
