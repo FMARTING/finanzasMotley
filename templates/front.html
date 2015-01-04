@@ -6,10 +6,9 @@
 	</head>
 	
 	<style type="text/css">
-	table, th, td{
+	table, td {
 	border: 1px solid black;
-	text-align:center;
-	width: 10px;
+	text-align: center;
 	table-layout: auto;
 	}
 	#B_Izquierda{
@@ -25,80 +24,88 @@
 	</style>
 	<body>
 		<h1> Finanzas generales de {{equipo}} </h1>
-			<div>
-				<div id="B_Derecha">
-					<!--<p>{{Domingos}}</p>-->
-					{% autoescape false %}
-						{{cal}}
-					{% endautoescape %}
-					<p> Mon = Lunes, Tue = Martes, Wed = Miercoles, Thu = Jueves, Fri = Viernes, Sat = Sabado y Sun = Domingo</p>
-					<br>
-					<p> January = Enero, February = Febrero, March = Marzo, April = Abril, June = Junio, July = Julio, August = Agosto</p>
-					<p> September = Septiembre, October = Octubre, November = Noviembre y December = Diciembre</p>
+			<div id="B_Derecha">
+				{% autoescape false %}
+					{{cal}}
+				{% endautoescape %}
+				<p> Mon = Lunes, Tue = Martes, Wed = Miercoles, Thu = Jueves, Fri = Viernes, Sat = Sabado y Sun = Domingo</p>
+				<br>
+				<p> January = Enero, February = Febrero, March = Marzo, April = Abril, June = Junio, July = Julio, August = Agosto</p>
+				<p> September = Septiembre, October = Octubre, November = Noviembre y December = Diciembre</p>
+			</div>
+			
+			<div id="B_Izquierda">
+				<div>
+				<h2>Saldos mensuales del equipo</h2>
+				<table>
+					<tr>
+						<td rowspan="2"><strong>Nombre</strong></td>
+						<td colspan="12"><strong>Debe (mensual)</strong></td>
+						<td colspan="12"><strong>Haber (mensual)</strong></td> 
+						<td><strong>Balance</strong></td>
+					</tr>
+					<tr>
+						{% for i in range(1,13) %}
+						<td>{{i}}</td>
+						{% endfor %}
+						{% for i in range(1,13) %}
+						<td>{{i}}</td>
+						{% endfor %}
+					</tr>
+					{% for i in cursorMensual %}
+					<tr>
+						<td>{{i.ano}}</td>
+						<td>{{i.mes}}</td>
+						<td>{{i.deuda}}</td> 
+						<td>{{i.pago}}</td>
+						{% if i.saldo < 0 %}
+						<td style="color:red">{{i.saldo}}</td>
+						{% endif %}
+						{% if i.saldo > 0 %}
+						<td style="color:blue">{{i.saldo}}</td>
+						{% endif %}
+					</tr>
+					{% endfor %}
+					<tr>
+						<td>Total del año</td>
+						<td>-</td>
+						<td>{{deudaTotal}}</td>
+						<td>{{pagosTotal}}</td>
+						{% if saldoTotal <0 %}
+						<td style="color:red">{{saldoTotal}}</td>
+						{% else %}
+						<td style="color:blue">{{saldoTotal}}</td>
+						{% endif %}
+					</tr>
+				</table>
+				<br>
+				<br>
 				</div>
-				
-				<div id="B_Izquierda">
-					<h2>Saldos mensuales del equipo</h2>
-					<table style="width:40%">
+				<div>
+					<h2>Historial de pagos del equipo:</h2>
+					<table>
 						<tr>
-							<td><strong>AÑO</strong></td>
-							<td><strong>MES</strong></td>
-							<td><strong>DEUDA</strong></td> 
-							<td><strong>PAGOS</strong></td>
-							<td><strong>SALDO</strong></td>
+							<td><strong>FECHA</strong></td>
+							<td><strong>JUGADOR</strong></td> 
+							<td><strong>PAGO</strong></td>
+							<td><strong>DESCRIPCION</strong></td>
 						</tr>
-						{% for i in cursorMensual %}
+						{% for i in cursorPago %}
 						<tr>
-							<td>{{i.ano}}</td>
-							<td>{{i.mes}}</td>
-							<td>{{i.deuda}}</td> 
-							<td>{{i.pago}}</td>
-							{% if i.saldo < 0 %}
-							<td style="color:red">{{i.saldo}}</td>
+							<td>{{i.fecha}}</td>
+							<td>{{i.nombre}}</td>
+							{% if i.monto <0 %}
+							<td style="color:red">{{i.monto}}</td>
+							{% else %}
+							<td style="color:blue">{{i.monto}}</td>
 							{% endif %}
-							{% if i.saldo > 0 %}
-							<td style="color:blue">{{i.saldo}}</td>
-							{% endif %}
+							<td>{{i.comentario}}</td>
 						</tr>
 						{% endfor %}
-						<tr>
-							<td>Total del año</td>
-							<td>-</td>
-							<td>{{deudaTotal}}</td>
-							<td>{{pagosTotal}}</td>
-							{% if saldoTotal <0 %}
-							<td style="color:red">{{saldoTotal}}</td>
-							{% else %}
-							<td style="color:blue">{{saldoTotal}}</td>
-							{% endif %}
-						</tr>
 					</table>
-					<br>
-					<br>
-					
-					<h2>Historial de pagos del equipo:</h2>
-						<table style="width:40%">
-							<tr>
-								<td><strong>FECHA</strong></td>
-								<td><strong>JUGADOR</strong></td> 
-								<td><strong>PAGO</strong></td>
-								<td><strong>DESCRIPCION</strong></td>
-							</tr>
-							{% for i in cursorPago %}
-							<tr>
-								<td>{{i.fecha}}</td>
-								<td>{{i.nombre}}</td>
-								{% if i.monto <0 %}
-								<td style="color:red">{{i.monto}}</td>
-								{% else %}
-								<td style="color:blue">{{i.monto}}</td>
-								{% endif %}
-								<td>{{i.comentario}}</td>
-							</tr>
-							{% endfor %}
-						</table>
 				</div>
 			</div>
+			
 			<div>
 				<br>
 				<a href="/pago" style="clear: both">Ingresa un pago</a>
@@ -111,7 +118,13 @@
 			
 			<div>
 				<br>
+				<a href="/gastos_p" style="clear: both">Revisa los gastos por partido de tu equipo</a>
+			</div>
+			
+			<div>
+				<br>
 				<a href="/logout" style="clear: both">Cerrá tu sesión</a>
 			</div>
+			
 	</body>
 </html>

@@ -26,6 +26,7 @@ import time
 import datetime
 import calendar
 
+#seguirlo usando lo que anote en iNotes en mi celu
 """Desarrollar la parte de calcular la cantidad de fines de semana en cada mes, que se puedan confirmar los fines de semana que se jugaron y los que no para definir
 los costos de partido por mes. Tambien que se puedan ingresar los montos pagados por inscripcion, gastos administrativos y otros gastos mensuales
 Por ultimo con toda esta informacion que se muestre un resumen por jugador por mes de cada jugador con debe y haber
@@ -313,6 +314,11 @@ class GastosF (Handler):
 		equipo.gastos_otros = int(gastos_otros)
 		equipo.gastos_total = int(gastos_total)
 		equipo.put()
-		self.redirect('/main')		
+		self.redirect('/main')
+
+class GastosP (Handler):
+	def get(self):
+		self.render("gastos_p.html")
 		
-app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout),('/gastos_f', GastosF)], debug=True)
+app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout),('/gastos_f', GastosF),
+('/gastos_p', GastosP)], debug=True)
