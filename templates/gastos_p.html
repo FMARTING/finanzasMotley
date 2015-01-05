@@ -32,11 +32,11 @@
 					{% for i in range(1,11) %}
 					<tr>
 						<td>{{i}}</td>
-						<td><input type="text" name="{{i}}Gastos_p" value="{{iGastos_p}}"></td>
+						<td><input type="text" name="{{i}}Gastos_p"></td>	
 						<td>
-							<input type="checkbox" value="todos" checked>Todos
-							{% for i in range(1,13) %} <!-- reemplazar el range por un cursor de jugadores. En vez de i iria jugadores.nombre -->
-							<input type="checkbox" value="{{i}}" >{{i}}
+							<input name ="{{i}}participantes" type="checkbox" value="Todos" checked>Todos
+							{% for a in jugadores %}
+							<input name ="{{i}}participantes" type="checkbox" value="{{a.nombre}}" >{{a.nombre}}
 							{% endfor %}
 						</td>
 					</tr>
@@ -47,6 +47,6 @@
 			</form>
 		</div>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="/script/gastos_f_script.js" type="text/javascript" ></script>
+		<script src="/script/gastos_p_script.js" type="text/javascript" ></script>
 	</body>
 </html>

@@ -130,6 +130,19 @@ class Jugadores (db.Model):
 	usuario = db.StringProperty(required = True)
 	password = db.StringProperty(required = True)
 	equipo = db.IntegerProperty(required = True)
+	gastos_p1 = db.IntegerProperty()
+	gastos_p2 = db.IntegerProperty()
+	gastos_p3 = db.IntegerProperty()
+	gastos_p4 = db.IntegerProperty()
+	gastos_p5 = db.IntegerProperty()
+	gastos_p6 = db.IntegerProperty()
+	gastos_p7 = db.IntegerProperty()
+	gastos_p8 = db.IntegerProperty()
+	gastos_p9 = db.IntegerProperty()
+	gastos_p10 = db.IntegerProperty()
+	gastos_p11 = db.IntegerProperty()
+	gastos_p12 = db.IntegerProperty()
+	
 
 class Pago(Handler):
 	
@@ -317,8 +330,53 @@ class GastosF (Handler):
 		self.redirect('/main')
 
 class GastosP (Handler):
+	def renderGastosP(self, jugadores="", equipo=""):
+		self.render("gastos_p.html", jugadores = jugadores, equipo = equipo)
+
 	def get(self):
-		self.render("gastos_p.html")
+		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
+		equipo_id = equipo.key().id()
+		user_equipo = equipo.nombre
+		jugadores = db.GqlQuery("Select * from Jugadores where equipo = %s" %(str(equipo_id)))
+		self.renderGastosP(equipo = user_equipo, jugadores = jugadores)
+	
+	def post(self):
+		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
+		equipo_id = equipo.key().id()
+		user_equipo = equipo.nombre
+		mes = self.request.get("mes")
+		participantes1 = self.request.get("1participantes")
+		participantes2 = self.request.get("2participantes")
+		participantes3 = self.request.get("3participantes")
+		participantes4 = self.request.get("4participantes")
+		participantes5 = self.request.get("5participantes")
+		participantes6 = self.request.get("6participantes")
+		participantes7 = self.request.get("7participantes")
+		participantes8 = self.request.get("8participantes")
+		participantes9 = self.request.get("9participantes")
+		participantes10 = self.request.get("10participantes")
+		Gastos_p1 = self.request.get("1Gastos_p")
+		Gastos_p2 = self.request.get("2Gastos_p")
+		Gastos_p3 = self.request.get("3Gastos_p")
+		Gastos_p4 = self.request.get("4Gastos_p")
+		Gastos_p5 = self.request.get("5Gastos_p")
+		Gastos_p6 = self.request.get("6Gastos_p")
+		Gastos_p7 = self.request.get("7Gastos_p")
+		Gastos_p8 = self.request.get("8Gastos_p")
+		Gastos_p9 = self.request.get("9Gastos_p")
+		Gastos_p10 = self.request.get("10Gastos_p")
+		jugadores = db.GqlQuery("Select * from Jugadores where equipo = %s" %(str(equipo_id)))
+		cant_jug = jugadores.count()
+		#if participantes1 == "todos":
+		#terminar de hacer el if para tomar los datos del form y pasarlos a cada jugador segun cada mes	
+		"""for i in range(1,11):
+			if participantes+i == "todos": #no puedo unir participantes+i, no lo toma. Parece ser que solo toma lo literal. Quizas se puede solucionar con una lista??
+				for a in jugadores:
+					x = str("gastos_p"+a)
+					gastos_p1 = Gastos_p1/cant_jug
+					a(x = gastos_p1)"""
+		self.redirect('/main')
+		
 		
 app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout),('/gastos_f', GastosF),
 ('/gastos_p', GastosP)], debug=True)
