@@ -367,14 +367,18 @@ class GastosP (Handler):
 		Gastos_p10 = self.request.get("10Gastos_p")
 		jugadores = db.GqlQuery("Select * from Jugadores where equipo = %s" %(str(equipo_id)))
 		cant_jug = jugadores.count()
-		#if participantes1 == "todos":
-		#terminar de hacer el if para tomar los datos del form y pasarlos a cada jugador segun cada mes	
-		"""for i in range(1,11):
-			if participantes+i == "todos": #no puedo unir participantes+i, no lo toma. Parece ser que solo toma lo literal. Quizas se puede solucionar con una lista??
+		#funciona pero guarda cualquier valor --> encontrar cual es el calculo matematico que esta haciendo: problema con el loop o con la cuenta???
+		for i in participantes1:
+			if i == "todos":
 				for a in jugadores:
-					x = str("gastos_p"+a)
-					gastos_p1 = Gastos_p1/cant_jug
-					a(x = gastos_p1)"""
+					a.gastos_p1 = int(Gastos_p1)/int(cant_jug)
+					a.put()
+			else:
+				cant_jug = len(participantes1)
+				for a in jugadores:
+					a.gastos_p1 = int(Gastos_p1)/int(cant_jug)
+					a.put()
+				break
 		self.redirect('/main')
 		
 		
