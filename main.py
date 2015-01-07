@@ -65,7 +65,7 @@ def idEquipo(equipo): #devuelve el id del equipo del nuevo usuario, si ya existe
 	else:
 		return db.GqlQuery("Select * from Equipos where nombre= :1", equipo).get().key().id()
 
-def tamano_equipo(equipo):
+def tamano_equipo(equipo):#devuelve el tamano de un equipo
 	x = db.GqlQuery("Select * from Jugadores where equipo= :1", equipo).fetch(None)
 	cantidad_jugadores = 0
 	for i in x:
@@ -93,6 +93,12 @@ def valid_username(username):
 def matched_password(password, verify):
 	if password == verify: return True
 	else: return False
+
+def obtainInt(self, campo):
+	if self.request.get(str(campo)) == "":
+		return 0
+	else:
+		return int(self.request.get(str(campo)))
 
 class Handler(webapp2.RequestHandler):
 	def write (self, *a, **kw):
@@ -330,8 +336,8 @@ class GastosF (Handler):
 		self.redirect('/main')
 
 class GastosP (Handler):
-	def renderGastosP(self, jugadores="", equipo=""):
-		self.render("gastos_p.html", jugadores = jugadores, equipo = equipo)
+	def renderGastosP(self, jugadores="", equipo="", qjugadores = "", gastos1=""):
+		self.render("gastos_p.html", jugadores = jugadores, equipo = equipo, qjugadores=qjugadores, gastos1 = gastos1)
 
 	def get(self):
 		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
@@ -345,42 +351,46 @@ class GastosP (Handler):
 		equipo_id = equipo.key().id()
 		user_equipo = equipo.nombre
 		mes = self.request.get("mes")
-		participantes1 = self.request.get("1participantes")
-		participantes2 = self.request.get("2participantes")
-		participantes3 = self.request.get("3participantes")
-		participantes4 = self.request.get("4participantes")
-		participantes5 = self.request.get("5participantes")
-		participantes6 = self.request.get("6participantes")
-		participantes7 = self.request.get("7participantes")
-		participantes8 = self.request.get("8participantes")
-		participantes9 = self.request.get("9participantes")
-		participantes10 = self.request.get("10participantes")
-		Gastos_p1 = self.request.get("1Gastos_p")
-		Gastos_p2 = self.request.get("2Gastos_p")
-		Gastos_p3 = self.request.get("3Gastos_p")
-		Gastos_p4 = self.request.get("4Gastos_p")
-		Gastos_p5 = self.request.get("5Gastos_p")
-		Gastos_p6 = self.request.get("6Gastos_p")
-		Gastos_p7 = self.request.get("7Gastos_p")
-		Gastos_p8 = self.request.get("8Gastos_p")
-		Gastos_p9 = self.request.get("9Gastos_p")
-		Gastos_p10 = self.request.get("10Gastos_p")
+		participantes1 = self.request.get("1participantes", allow_multiple=True)
+		participantes2 = self.request.get("2participantes", allow_multiple=True)
+		participantes3 = self.request.get("3participantes", allow_multiple=True)
+		participantes4 = self.request.get("4participantes", allow_multiple=True)
+		participantes5 = self.request.get("5participantes", allow_multiple=True)
+		participantes6 = self.request.get("6participantes", allow_multiple=True)
+		participantes7 = self.request.get("7participantes", allow_multiple=True)
+		participantes8 = self.request.get("8participantes", allow_multiple=True)
+		participantes9 = self.request.get("9participantes", allow_multiple=True)
+		participantes10 = self.request.get("10participantes", allow_multiple=True)
+		Gastos_p1 = obtainInt(self, "1Gastos_p")
+		Gastos_p2 = obtainInt(self, "2Gastos_p")
+		Gastos_p3 = obtainInt(self, "3Gastos_p")
+		Gastos_p4 = obtainInt(self, "4Gastos_p")
+		Gastos_p5 = obtainInt(self, "5Gastos_p")
+		Gastos_p6 = obtainInt(self, "6Gastos_p")
+		Gastos_p7 = obtainInt(self, "7Gastos_p")
+		Gastos_p8 = obtainInt(self, "8Gastos_p")
+		Gastos_p9 = obtainInt(self, "9Gastos_p")
+		Gastos_p10 = obtainInt(self, "10Gastos_p")
+		#Gastos_mes = Gastos_p1+Gastos_p2+Gastos_p3+Gastos_p4+Gastos_p5+Gastos_p6+Gastos_p7+Gastos_p8+Gastos_p9+Gastos_p10
+		#la linea anterior no me sirve porque no todos los jugadores reciben el mismo monto
 		jugadores = db.GqlQuery("Select * from Jugadores where equipo = %s" %(str(equipo_id)))
-		cant_jug = jugadores.count()
-		#funciona pero guarda cualquier valor --> encontrar cual es el calculo matematico que esta haciendo: problema con el loop o con la cuenta???
+		cant_jug = tamano_equipo(equipo_id)
+		#hacer un diccionario para que para cada clave, el nombre de un jugador, se le asignen varios valores de gastos acorde a cada partido. Y despues al final
+		#sumo todos esos valores y los ingreso a la base de datos
+		gastos_jugadores = dict()
 		for i in participantes1:
-			if i == "todos":
+			if i == "Todos":
 				for a in jugadores:
-					a.gastos_p1 = int(Gastos_p1)/int(cant_jug)
-					a.put()
-			else:
-				cant_jug = len(participantes1)
-				for a in jugadores:
-					a.gastos_p1 = int(Gastos_p1)/int(cant_jug)
+					a.gastos_p1 = Gastos_mes/int(cant_jug)
 					a.put()
 				break
-		self.redirect('/main')
-		
-		
+			else: #aca da como que todos es 7
+				cant_jug = len(participantes1)
+				for a in jugadores:
+					a.gastos_p1 = Gastos_mes/int(float(cant_jug))
+					a.put()
+				break
+		self.renderGastosP(equipo = user_equipo, jugadores = jugadores, gastos1 = Gastos_mes, qjugadores = str(cant_jug))
+
 app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout),('/gastos_f', GastosF),
 ('/gastos_p', GastosP)], debug=True)
