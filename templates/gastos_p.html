@@ -16,7 +16,7 @@
 		<div>
 			<form method="post">
 				<p style="display:inline">Selecciona el mes:</p>
-				<select>
+				<select name = "mes">
 					{% for i in range(1,13)%}
 					<option name="mes"value="{{i}}">{{i}}</option>
 					{% endfor %}
@@ -46,6 +46,7 @@
 				<input type="submit" value="Guardar">
 				<p>{{gastos1}}</p>
 				<p>{{qjugadores}}</p>
+				<p>{{mes}}</p>
 			</form>
 		</div>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

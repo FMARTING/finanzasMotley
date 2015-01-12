@@ -26,10 +26,11 @@ import time
 import datetime
 import calendar
 
-#seguirlo usando lo que anote en iNotes en mi celu
-"""Desarrollar la parte de calcular la cantidad de fines de semana en cada mes, que se puedan confirmar los fines de semana que se jugaron y los que no para definir
-los costos de partido por mes. Tambien que se puedan ingresar los montos pagados por inscripcion, gastos administrativos y otros gastos mensuales
-Por ultimo con toda esta informacion que se muestre un resumen por jugador por mes de cada jugador con debe y haber
+"""falta ingresar una forma de distribuir los gastos de partido acorde a los jugadores que fueron.
+Por ultimo con toda esta informacion que se muestre un resumen por jugador por mes de cada jugador con debe y haber. De esto ultimo falta configuarar la parte de
+haber, sumar los pagos realizados en cada mes y mostrarlos. Y en base a esto ultimo tambien calcular el mensual total del equipo por mes
+Por ultimo poner una pagina mas donde solo yo, como administrador o la liga, podamos determinar quien es el administrador de cada equipo que va a poder ingresar
+pagos y hacer modificaciones a los montos
 """
 from google.appengine.ext import db
 
@@ -108,6 +109,56 @@ class Handler(webapp2.RequestHandler):
 		return t.render(params)
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
+		
+def ingresarGastoPorPartido(lista, mes, monto): #acorde a cada mes pasa a la base de datos los gastos de partido para cada jugador
+	if mes == "1":
+		for a in lista:
+			a.gastos_p1 = monto
+			a.put()
+	if mes == "2":
+		for a in lista:
+			a.gastos_p2 = monto
+			a.put()
+	if mes == "3":
+		for a in lista:
+			a.gastos_p3 = monto
+			a.put()
+	if mes == "4":
+		for a in lista:
+			a.gastos_p4 = monto
+			a.put()
+	if mes == "5":
+		for a in lista:
+			a.gastos_p5 = monto
+			a.put()
+	if mes == "6":
+		for a in lista:
+			a.gastos_p6 = monto
+			a.put()
+	if mes == "7":
+		for a in lista:
+			a.gastos_p7 = monto
+			a.put()
+	if mes == "8":
+		for a in lista:
+			a.gastos_p8 = monto
+			a.put()
+	if mes == "9":
+		for a in lista:
+			a.gastos_p9 = monto
+			a.put()	
+	if mes == "10":
+		for a in lista:
+			a.gastos_p10 = monto
+			a.put()
+	if mes == "11":
+		for a in lista:
+			a.gastos_p11 = monto
+			a.put()
+	if mes == "12":
+		for a in lista:
+			a.gastos_p12 = monto
+			a.put()
 
 class Equipos (db.Model):
 	nombre = db.StringProperty(required = True)
@@ -136,18 +187,18 @@ class Jugadores (db.Model):
 	usuario = db.StringProperty(required = True)
 	password = db.StringProperty(required = True)
 	equipo = db.IntegerProperty(required = True)
-	gastos_p1 = db.IntegerProperty()
-	gastos_p2 = db.IntegerProperty()
-	gastos_p3 = db.IntegerProperty()
-	gastos_p4 = db.IntegerProperty()
-	gastos_p5 = db.IntegerProperty()
-	gastos_p6 = db.IntegerProperty()
-	gastos_p7 = db.IntegerProperty()
-	gastos_p8 = db.IntegerProperty()
-	gastos_p9 = db.IntegerProperty()
-	gastos_p10 = db.IntegerProperty()
-	gastos_p11 = db.IntegerProperty()
-	gastos_p12 = db.IntegerProperty()
+	gastos_p1 = db.IntegerProperty(default = 0)
+	gastos_p2 = db.IntegerProperty(default = 0)
+	gastos_p3 = db.IntegerProperty(default = 0)
+	gastos_p4 = db.IntegerProperty(default = 0)
+	gastos_p5 = db.IntegerProperty(default = 0)
+	gastos_p6 = db.IntegerProperty(default = 0)
+	gastos_p7 = db.IntegerProperty(default = 0)
+	gastos_p8 = db.IntegerProperty(default = 0)
+	gastos_p9 = db.IntegerProperty(default = 0)
+	gastos_p10 = db.IntegerProperty(default = 0)
+	gastos_p11 = db.IntegerProperty(default = 0)
+	gastos_p12 = db.IntegerProperty(default = 0)
 	
 
 class Pago(Handler):
@@ -235,6 +286,7 @@ class nuevoUsuario(Handler):
 
 	def get(self):
 		self.renderNuevo()
+
 	def post(self):
 		nombre = escape(self.request.get('inombre'))
 		apellido = escape(self.request.get('iapellido'))
@@ -248,7 +300,7 @@ class nuevoUsuario(Handler):
 			usuario = str(usuario)
 			if uniqueUser(usuario):#verdadero si el usuario es unico
 				id_equipo = idEquipo(equipo)
-				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = id_equipo)
+				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = id_equipo, gastos_p1 = 0, gastos_p2 =0, gastos_p3 = 0, gastos_p4 = 0, gastos_p5 = 0, gastos_p6 = 0, gastos_p7=0, gastos_p8=0, gastos_p9 = 0, gastos_p10=0, gastos_p11=0,gastos_p12=0)
 				a.put()
 				self.response.headers.add_header('Set-Cookie', 'name = %s; Path=/' %(usuario))
 				self.response.headers.add_header('Set-Cookie', 'pass = %s; Path=/' %(hpassword))
@@ -267,25 +319,31 @@ class nuevoUsuario(Handler):
 			self.renderNuevo(errorUsuario = errorUsuario, inombre = nombre, iapellido = apellido)
 
 class MainPage(Handler):
-    def get(self):
-		equipo = self.request.cookies.get('equipo',0)
+	def renderMain(self, gasto_mes_equipo="", equipo = "", cursorNombres="", cursorPago = "", deudaTotal="", pagosTotal="", saldoTotal="", cal = ""):
+		self.render("front.html", gasto_mes_equipo = gasto_mes_equipo, equipo = equipo, cursorNombres = cursorNombres, cursorPago = cursorPago, deudaTotal = deudaTotal, pagosTotal = pagosTotal, saldoTotal = saldoTotal, cal = cal)
+
+	def get(self):
+		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
+		equipo_id = equipo.key().id()
 		deudaTotal = 0
 		pagosTotal = 0
 		saldoTotal = 0
 		year = int(self.request.cookies.get('fecha',0))
-		x = Equipos.get_by_id(int(equipo))
-		nombre_equipo = str(x.nombre)
+		#x = Equipos.get_by_id(int(equipo))
+		user_equipo = equipo.nombre
 		htmlcal = calendar.HTMLCalendar(calendar.MONDAY)
 		cal =  htmlcal.formatyear(year)
-		cursorPago = db.GqlQuery("Select * from Pagos where equipo = %s order by fecha desc" %(str(equipo)))
+		cursorPago = db.GqlQuery("Select * from Pagos where equipo = %s order by fecha desc" %(str(equipo_id)))
 		cursorMensual = db.GqlQuery("Select * from MontoMensual order by mes desc")
+		jugadores = db.GqlQuery("Select * from Jugadores where equipo = %s" %(str(equipo_id)))
 		for i in cursorMensual:
 			deudaTotal = deudaTotal + i.deuda
 			pagosTotal = pagosTotal + i.pago
 			saldoTotal = saldoTotal + i.saldo
-		#calcular la cantidad de fines de semana en el mes
-		domingos = str(len([1 for i in calendar.monthcalendar(year, datetime.datetime.today().month) if i[6] != 0]))
-		self.render("front.html", cursorMensual = "", cursorPago = cursorPago, deudaTotal = "", pagosTotal = "", saldoTotal = "", equipo = nombre_equipo, cal = cal)
+		#Vieja linea para calcular la cantidad de fines de semana en el mes, al final no la use
+		#domingos = str(len([1 for i in calendar.monthcalendar(year, datetime.datetime.today().month) if i[6] != 0]))
+		gasto_mes_equipo = int(equipo.gastos_total/12)
+		self.renderMain(cal = cal, cursorNombres = jugadores, equipo = user_equipo, gasto_mes_equipo = gasto_mes_equipo, cursorPago = cursorPago)
 
 class Logout (Handler):
 	def get(self):
@@ -336,8 +394,8 @@ class GastosF (Handler):
 		self.redirect('/main')
 
 class GastosP (Handler):
-	def renderGastosP(self, jugadores="", equipo="", qjugadores = "", gastos1=""):
-		self.render("gastos_p.html", jugadores = jugadores, equipo = equipo, qjugadores=qjugadores, gastos1 = gastos1)
+	def renderGastosP(self, jugadores="", equipo="", qjugadores = "", gastos1="", mes = ""):
+		self.render("gastos_p.html", jugadores = jugadores, equipo = equipo, qjugadores=qjugadores, gastos1 = gastos1, mes = mes)
 
 	def get(self):
 		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
@@ -371,26 +429,39 @@ class GastosP (Handler):
 		Gastos_p8 = obtainInt(self, "8Gastos_p")
 		Gastos_p9 = obtainInt(self, "9Gastos_p")
 		Gastos_p10 = obtainInt(self, "10Gastos_p")
-		#Gastos_mes = Gastos_p1+Gastos_p2+Gastos_p3+Gastos_p4+Gastos_p5+Gastos_p6+Gastos_p7+Gastos_p8+Gastos_p9+Gastos_p10
-		#la linea anterior no me sirve porque no todos los jugadores reciben el mismo monto
+		Gastos_mes = Gastos_p1+Gastos_p2+Gastos_p3+Gastos_p4+Gastos_p5+Gastos_p6+Gastos_p7+Gastos_p8+Gastos_p9+Gastos_p10
 		jugadores = db.GqlQuery("Select * from Jugadores where equipo = %s" %(str(equipo_id)))
 		cant_jug = tamano_equipo(equipo_id)
 		#hacer un diccionario para que para cada clave, el nombre de un jugador, se le asignen varios valores de gastos acorde a cada partido. Y despues al final
 		#sumo todos esos valores y los ingreso a la base de datos
-		gastos_jugadores = dict()
-		for i in participantes1:
-			if i == "Todos":
-				for a in jugadores:
-					a.gastos_p1 = Gastos_mes/int(cant_jug)
-					a.put()
-				break
-			else: #aca da como que todos es 7
+		#por ahora lo voy a dejar para que siempre se divida entre todos, hasta que pueda encontrarle una solucion
+		#for i in participantes1:
+		#	if i == "Todos":
+		#saque las lineas anteriores hasta que se me ocurra una solucion sobre como dividir los gastos de partido por mes entre varios, pudiendo ser distintos en cada fin de semana
+		"""for a in jugadores:
+			if mes == "1":
+				a.gastos_p1 = Gastos_mes/int(cant_jug)
+			if mes == "2":
+				a.gastos_p2 = Gastos_mes/int(cant_jug)
+			if mes == "2":
+				a.gastos_p2 = Gastos_mes/int(cant_jug)
+			a.put()
+				#break
+			else:
 				cant_jug = len(participantes1)
-				for a in jugadores:
-					a.gastos_p1 = Gastos_mes/int(float(cant_jug))
-					a.put()
-				break
-		self.renderGastosP(equipo = user_equipo, jugadores = jugadores, gastos1 = Gastos_mes, qjugadores = str(cant_jug))
+				for a in participantes1:
+					pagadores = db.GqlQuery("Select * from Jugadores where equipo = :1 and nombre = :2", (str(equipo_id)), str(a))
+					for x in pagadores:
+						x.gastos_p1 = Gastos_mes/int(float(cant_jug))
+						x.put()
+				break"""
+		Gasto_p_part = Gastos_mes/cant_jug
+		ingresarGastoPorPartido(jugadores, mes, Gasto_p_part)
+		#self.renderGastosP(equipo = user_equipo, jugadores = jugadores, gastos1 = Gastos_mes, qjugadores = str(cant_jug), mes = mes)
+		#deje la linea de arriba por si en el futuro quiero probar como funcinoa la formula, la actual que es solo para todos o eventualmente una que 
+		#guarde montos distintso para cada jugador si cada fin de semana es un grupo distinto de jugadores
+		#para mi la clave de esa solucion es usar un diccionario, acumular valores para c/jugador, sumarlo al final y subirlo a la base en el mes adecuado
+		self.redirect('/main')
 
 app = webapp2.WSGIApplication([('/', Login),('/pago', Pago),('/main', MainPage),('/nuevo_usuario', nuevoUsuario),('/logout', Logout),('/gastos_f', GastosF),
 ('/gastos_p', GastosP)], debug=True)
