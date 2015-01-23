@@ -199,7 +199,6 @@ class Jugadores (db.Model):
 	gastos_p10 = db.IntegerProperty(default = 0)
 	gastos_p11 = db.IntegerProperty(default = 0)
 	gastos_p12 = db.IntegerProperty(default = 0)
-	
 
 class Pago(Handler):
 	
@@ -435,26 +434,6 @@ class GastosP (Handler):
 		#hacer un diccionario para que para cada clave, el nombre de un jugador, se le asignen varios valores de gastos acorde a cada partido. Y despues al final
 		#sumo todos esos valores y los ingreso a la base de datos
 		#por ahora lo voy a dejar para que siempre se divida entre todos, hasta que pueda encontrarle una solucion
-		#for i in participantes1:
-		#	if i == "Todos":
-		#saque las lineas anteriores hasta que se me ocurra una solucion sobre como dividir los gastos de partido por mes entre varios, pudiendo ser distintos en cada fin de semana
-		"""for a in jugadores:
-			if mes == "1":
-				a.gastos_p1 = Gastos_mes/int(cant_jug)
-			if mes == "2":
-				a.gastos_p2 = Gastos_mes/int(cant_jug)
-			if mes == "2":
-				a.gastos_p2 = Gastos_mes/int(cant_jug)
-			a.put()
-				#break
-			else:
-				cant_jug = len(participantes1)
-				for a in participantes1:
-					pagadores = db.GqlQuery("Select * from Jugadores where equipo = :1 and nombre = :2", (str(equipo_id)), str(a))
-					for x in pagadores:
-						x.gastos_p1 = Gastos_mes/int(float(cant_jug))
-						x.put()
-				break"""
 		Gasto_p_part = Gastos_mes/cant_jug
 		ingresarGastoPorPartido(jugadores, mes, Gasto_p_part)
 		#self.renderGastosP(equipo = user_equipo, jugadores = jugadores, gastos1 = Gastos_mes, qjugadores = str(cant_jug), mes = mes)
