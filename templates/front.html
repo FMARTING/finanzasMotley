@@ -59,7 +59,7 @@
 						<td>{{gasto_mes_equipo + i.gastos_p12}}</td>
 						{% for a in cursorPago %}
 							{% for m in range(1,13) %}
-								{% if a.nombre == i.nombre and a.fecha.month == m %}
+								{% if a.nombre == i.nombre and a.month == m %}
 								<td>{{a.monto}}</td>
 								{% endif %}
 							{% endfor %}
@@ -85,14 +85,16 @@
 					<h2>Historial de pagos del equipo:</h2>
 					<table>
 						<tr>
-							<td><strong>FECHA</strong></td>
+							<td><strong>AÑO</strong></td>
+							<td><strong>MES</strong></td>
 							<td><strong>JUGADOR</strong></td> 
 							<td><strong>PAGO</strong></td>
 							<td><strong>DESCRIPCION</strong></td>
 						</tr>
 						{% for i in cursorPago %}
 						<tr>
-							<td>{{i.fecha}}</td>
+							<td>{{i.year}}</td>
+							<td>{{i.month}}</td>
 							<td>{{i.nombre}}</td>
 							{% if i.monto <0 %}
 							<td style="color:red">{{i.monto}}</td>

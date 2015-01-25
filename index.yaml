@@ -27,3 +27,9 @@ indexes:
   - name: equipo
   - name: fecha
     direction: desc
+
+- kind: Pagos
+  properties:
+  - name: equipo
+  - name: year
+    direction: desc

@@ -175,11 +175,13 @@ class MontoMensual(db.Model):
 	ano = db.IntegerProperty(required = True)
 
 class Pagos(db.Model):
+	jugador_id = db.IntegerProperty(required = True)
 	nombre = db.StringProperty(required = True)
 	monto = db.IntegerProperty(required = True)
 	comentario = db.StringProperty(required = True)
 	equipo = db.IntegerProperty(required = True)
-	fecha = db.DateTimeProperty(auto_now_add = True)
+	year = db.IntegerProperty(required = True)
+	month = db.IntegerProperty(required = True)
 
 class Jugadores (db.Model):
 	nombre = db.StringProperty(required = True)
@@ -217,10 +219,14 @@ class Pago(Handler):
 		idescr = self.request.get("idescripcion")
 		titular_pago = self.request.get("pjugador")
 		user = Jugadores.get_by_id(int(self.request.cookies.get('jugador',0)))
+		user_id = user.key().id()
 		user_nombre = str(user.nombre)
 		user_equipo_id = self.request.cookies.get('equipo',0)
 		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
 		user_equipo = equipo.nombre
+		fecha_actual = datetime.datetime.today()
+		year = fecha_actual.year
+		month = fecha_actual.month
 		if imonto and idescr:
 			if titular_pago == "otro":
 				if not ijugador:
@@ -230,7 +236,7 @@ class Pago(Handler):
 					user_monto = int(imonto)
 					user_nombre = str(ijugador)
 					user_comentario = str(idescr)
-					nPago = Pagos(nombre = user_nombre, monto = user_monto, comentario = user_comentario, equipo = int(user_equipo_id))
+					nPago = Pagos(nombre = user_nombre, jugador_id = user_id, monto = user_monto, comentario = user_comentario, equipo = int(user_equipo_id), year = year, month = month)
 					nPago.put()
 					self.redirect('/main')
 				else:
@@ -240,7 +246,7 @@ class Pago(Handler):
 				if imonto and idescr:
 					user_monto = int(imonto)
 					user_comentario = str(idescr)
-					nPago = Pagos(nombre = user_nombre, monto = user_monto, comentario = user_comentario, equipo = int(user_equipo_id))
+					nPago = Pagos(nombre = user_nombre, monto = user_monto, jugador_id = user_id, comentario = user_comentario, equipo = int(user_equipo_id), year = year, month = month)
 					nPago.put()
 					self.redirect('/main')
 				else:
@@ -299,7 +305,8 @@ class nuevoUsuario(Handler):
 			usuario = str(usuario)
 			if uniqueUser(usuario):#verdadero si el usuario es unico
 				id_equipo = idEquipo(equipo)
-				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = id_equipo, gastos_p1 = 0, gastos_p2 =0, gastos_p3 = 0, gastos_p4 = 0, gastos_p5 = 0, gastos_p6 = 0, gastos_p7=0, gastos_p8=0, gastos_p9 = 0, gastos_p10=0, gastos_p11=0,gastos_p12=0)
+				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = id_equipo)
+				#gastos_p1 = 0, gastos_p2 =0, gastos_p3 = 0, gastos_p4 = 0, gastos_p5 = 0, gastos_p6 = 0, gastos_p7=0, gastos_p8=0, gastos_p9 = 0, gastos_p10=0, gastos_p11=0,gastos_p12=0
 				a.put()
 				self.response.headers.add_header('Set-Cookie', 'name = %s; Path=/' %(usuario))
 				self.response.headers.add_header('Set-Cookie', 'pass = %s; Path=/' %(hpassword))
@@ -328,11 +335,10 @@ class MainPage(Handler):
 		pagosTotal = 0
 		saldoTotal = 0
 		year = int(self.request.cookies.get('fecha',0))
-		#x = Equipos.get_by_id(int(equipo))
 		user_equipo = equipo.nombre
 		htmlcal = calendar.HTMLCalendar(calendar.MONDAY)
 		cal =  htmlcal.formatyear(year)
-		cursorPago = db.GqlQuery("Select * from Pagos where equipo = %s order by fecha desc" %(str(equipo_id)))
+		cursorPago = db.GqlQuery("Select * from Pagos where equipo = %s" %(str(equipo_id)))
 		cursorMensual = db.GqlQuery("Select * from MontoMensual order by mes desc")
 		jugadores = db.GqlQuery("Select * from Jugadores where equipo = %s" %(str(equipo_id)))
 		for i in cursorMensual:
@@ -341,7 +347,10 @@ class MainPage(Handler):
 			saldoTotal = saldoTotal + i.saldo
 		#Vieja linea para calcular la cantidad de fines de semana en el mes, al final no la use
 		#domingos = str(len([1 for i in calendar.monthcalendar(year, datetime.datetime.today().month) if i[6] != 0]))
-		gasto_mes_equipo = int(equipo.gastos_total/12)
+		try:
+			gasto_mes_equipo = int(equipo.gastos_total/12)
+		except:
+			gasto_mes_equipo = 0
 		self.renderMain(cal = cal, cursorNombres = jugadores, equipo = user_equipo, gasto_mes_equipo = gasto_mes_equipo, cursorPago = cursorPago)
 
 class Logout (Handler):
