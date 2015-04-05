@@ -9,7 +9,8 @@ table, td {
 	width: 50%
 	}
 	#B_Derecha{
-	float: right;
+	float: bottom;
+	margin-top: 20px;
 	width: 50%;
 	border:1px;
 	}

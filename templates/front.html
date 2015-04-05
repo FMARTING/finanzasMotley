@@ -12,17 +12,8 @@
 				<a href="/gastos_p" class="myButton">Revisar los gastos por partido de tu equipo</a>
 				<a href="/logout" class="myButton">Cerrar tu sesión</a>
 		</div>
-		<h1> Finanzas generales de {{equipo}} </h1>
-			<div id="B_Derecha">
-				{% autoescape false %}
-					{{cal}}
-				{% endautoescape %}
-				<p> Mon = Lunes, Tue = Martes, Wed = Miercoles, Thu = Jueves, Fri = Viernes, Sat = Sabado y Sun = Domingo</p>
-				<br>
-				<p> January = Enero, February = Febrero, March = Marzo, April = Abril, June = Junio, July = Julio, August = Agosto</p>
-				<p> September = Septiembre, October = Octubre, November = Noviembre y December = Diciembre</p>
-			</div>
-			
+		<h1> Finanzas de {{equipo}} </h1>
+					
 			<div id="B_Izquierda">
 				<div>
 				<h2>Saldos mensuales del equipo</h2>
@@ -106,6 +97,15 @@
 						{% endfor %}
 					</table>
 				</div>
+			</div>
+			<div id="B_Derecha">
+				{% autoescape false %}
+					{{cal}}
+				{% endautoescape %}
+				<p> Mon = Lunes, Tue = Martes, Wed = Miercoles, Thu = Jueves, Fri = Viernes, Sat = Sabado y Sun = Domingo</p>
+				<br>
+				<p> January = Enero, February = Febrero, March = Marzo, April = Abril, June = Junio, July = Julio, August = Agosto</p>
+				<p> September = Septiembre, October = Octubre, November = Noviembre y December = Diciembre</p>
 			</div>
 	</body>
 </html>

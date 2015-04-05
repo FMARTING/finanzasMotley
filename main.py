@@ -31,6 +31,8 @@ Por ultimo con toda esta informacion que se muestre un resumen por jugador por m
 haber, sumar los pagos realizados en cada mes y mostrarlos. Y en base a esto ultimo tambien calcular el mensual total del equipo por mes
 Por ultimo poner una pagina mas donde solo yo, como administrador o la liga, podamos determinar quien es el administrador de cada equipo que va a poder ingresar
 pagos y hacer modificaciones a los montos
+
+Otra cosa para ver es como hacer el display de la suma de los pagos dentro de un mismo mes de un mismo jugador. Por ejemplo, si yo en el mismo mes pago 300 un dia y 500 otro que me aparezcan 800 en el mismo mes, que lo sume el sistema y que no lo haga figurar como en meses separados
 """
 from google.appengine.ext import db
 
@@ -201,6 +203,22 @@ class Jugadores (db.Model):
 	gastos_p10 = db.IntegerProperty(default = 0)
 	gastos_p11 = db.IntegerProperty(default = 0)
 	gastos_p12 = db.IntegerProperty(default = 0)
+	admin = db.BooleanProperty(default=False)
+
+class Haberes_mes (db.Model):
+	Jugador = db.StringProperty(required = True)
+	H1 = db.IntegerProperty(default = 0)
+	H2 = db.IntegerProperty(default = 0)
+	H3 = db.IntegerProperty(default = 0)
+	H4 = db.IntegerProperty(default = 0)
+	H5 = db.IntegerProperty(default = 0)
+	H6 = db.IntegerProperty(default = 0)
+	H7 = db.IntegerProperty(default = 0)
+	H8 = db.IntegerProperty(default = 0)
+	H9 = db.IntegerProperty(default = 0)
+	H10 = db.IntegerProperty(default = 0)
+	H11 = db.IntegerProperty(default = 0)
+	H12 = db.IntegerProperty(default = 0)
 
 class Pago(Handler):
 	
@@ -238,6 +256,14 @@ class Pago(Handler):
 					user_comentario = str(idescr)
 					nPago = Pagos(nombre = user_nombre, jugador_id = user_id, monto = user_monto, comentario = user_comentario, equipo = int(user_equipo_id), year = year, month = month)
 					nPago.put()
+					#agregar aca las lineas para que genere si no existe el db haberes_mes y para que calcule cada uno de los pagos totales por mes segun corresponda
+					""" Aca algunas lineas que ya pense, quizas el ID del jugador se puede sacar de la cooie
+					x = db.GqlQuery("Select * from Jugadores where usuario= :1", usuario).get()
+					if x:
+						id_jugador = x.key().id()
+					h = Haberes_mes(Jugador = str(id_jugador))
+					h.put()
+					"""
 					self.redirect('/main')
 				else:
 					errorJugador = "Hubo un problema, contactate con Facu"
@@ -306,7 +332,6 @@ class nuevoUsuario(Handler):
 			if uniqueUser(usuario):#verdadero si el usuario es unico
 				id_equipo = idEquipo(equipo)
 				a = Jugadores(nombre = nombre, apellido = apellido, usuario = usuario, password = hpassword, equipo = id_equipo)
-				#gastos_p1 = 0, gastos_p2 =0, gastos_p3 = 0, gastos_p4 = 0, gastos_p5 = 0, gastos_p6 = 0, gastos_p7=0, gastos_p8=0, gastos_p9 = 0, gastos_p10=0, gastos_p11=0,gastos_p12=0
 				a.put()
 				self.response.headers.add_header('Set-Cookie', 'name = %s; Path=/' %(usuario))
 				self.response.headers.add_header('Set-Cookie', 'pass = %s; Path=/' %(hpassword))
