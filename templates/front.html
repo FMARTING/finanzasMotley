@@ -36,18 +36,18 @@
 					{% for i in cursorNombres %}
 					<tr>
 						<td>{{i.nombre}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p1}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p2}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p3}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p4}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p5}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p6}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p7}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p8}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p9}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p10}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p11}}</td>
-						<td>{{gasto_mes_equipo + i.gastos_p12}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p1}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p2}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p3}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p4}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p5}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p6}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p7}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p8}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p9}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p10}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p11}}</td>
+						<td>{{gasto_mes_jugador + i.gastos_p12}}</td>
 						{% for a in cursorPago %}
 							{% for m in range(1,13) %}
 								{% if a.nombre == i.nombre and a.month == m %}

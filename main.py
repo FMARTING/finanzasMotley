@@ -350,8 +350,8 @@ class nuevoUsuario(Handler):
 			self.renderNuevo(errorUsuario = errorUsuario, inombre = nombre, iapellido = apellido)
 
 class MainPage(Handler):
-	def renderMain(self, gasto_mes_equipo="", equipo = "", cursorNombres="", cursorPago = "", deudaTotal="", pagosTotal="", saldoTotal="", cal = ""):
-		self.render("front.html", gasto_mes_equipo = gasto_mes_equipo, equipo = equipo, cursorNombres = cursorNombres, cursorPago = cursorPago, deudaTotal = deudaTotal, pagosTotal = pagosTotal, saldoTotal = saldoTotal, cal = cal)
+	def renderMain(self, gasto_mes_jugador="", equipo = "", cursorNombres="", cursorPago = "", deudaTotal="", pagosTotal="", saldoTotal="", cal = ""):
+		self.render("front.html", gasto_mes_jugador = gasto_mes_jugador, equipo = equipo, cursorNombres = cursorNombres, cursorPago = cursorPago, deudaTotal = deudaTotal, pagosTotal = pagosTotal, saldoTotal = saldoTotal, cal = cal)
 
 	def get(self):
 		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
@@ -373,10 +373,10 @@ class MainPage(Handler):
 		#Vieja linea para calcular la cantidad de fines de semana en el mes, al final no la use
 		#domingos = str(len([1 for i in calendar.monthcalendar(year, datetime.datetime.today().month) if i[6] != 0]))
 		try:
-			gasto_mes_equipo = int(equipo.gastos_total/12)
+			gasto_mes_jugador = int(equipo.gastos_total/12/tamano_equipo(equipo_id))
 		except:
-			gasto_mes_equipo = 0
-		self.renderMain(cal = cal, cursorNombres = jugadores, equipo = user_equipo, gasto_mes_equipo = gasto_mes_equipo, cursorPago = cursorPago)
+			gasto_mes_jugador = 0
+		self.renderMain(cal = cal, cursorNombres = jugadores, equipo = user_equipo, gasto_mes_jugador = gasto_mes_jugador, cursorPago = cursorPago)
 
 class Logout (Handler):
 	def get(self):
