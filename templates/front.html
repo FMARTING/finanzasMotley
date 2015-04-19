@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-
+<!-- Agregar dropdown en la parte de ingreso de pagos para cada tipo de pago, e.g. gasots de partido, incsripcion, etc.-->
 <html>
 	<head>
 		<title>Finanzas {{equipo}}</title>
@@ -48,10 +48,12 @@
 						<td>{{gasto_mes_jugador + i.gastos_p10}}</td>
 						<td>{{gasto_mes_jugador + i.gastos_p11}}</td>
 						<td>{{gasto_mes_jugador + i.gastos_p12}}</td>
-						{% for a in cursorPago %}
-							{% for m in range(1,13) %}
-								{% if a.nombre == i.nombre and a.month == m %}
-								<td>{{a.monto}}</td>
+						{% for m in range(1,13) %}
+							{% for a in cursorSaldo %}	
+								{% if a.nombre == i.nombre %}	
+									{% if m == 4 %}
+								<td>{{a.H4}}</td>
+									{% endif %}
 								{% endif %}
 							{% endfor %}
 						{% endfor %}

@@ -32,7 +32,8 @@ haber, sumar los pagos realizados en cada mes y mostrarlos. Y en base a esto ult
 Por ultimo poner una pagina mas donde solo yo, como administrador o la liga, podamos determinar quien es el administrador de cada equipo que va a poder ingresar
 pagos y hacer modificaciones a los montos
 
-Otra cosa para ver es como hacer el display de la suma de los pagos dentro de un mismo mes de un mismo jugador. Por ejemplo, si yo en el mismo mes pago 300 un dia y 500 otro que me aparezcan 800 en el mismo mes, que lo sume el sistema y que no lo haga figurar como en meses separados
+ver como hacer para que la base haberes_mes no duplique entradas/objetos para el mismo jugador y hacerlo encajar con el front.html que actualmente pide variables con nombers que no
+coinciden con lo que yo habia usado antes
 """
 from google.appengine.ext import db
 
@@ -102,6 +103,18 @@ def obtainInt(self, campo):
 		return 0
 	else:
 		return int(self.request.get(str(campo)))
+		
+def cargar_haberes_mensuales(jugador):
+	haberes = dict()
+	nombre = str(Jugadores.get_by_id(jugador).nombre)
+	for a in range (1,13):
+		pagos_jugador = db.GqlQuery("Select * from Pagos where jugador_id= :1 AND month= :2", jugador, a)
+		n = 0
+		for x in pagos_jugador:
+			n += x.monto
+		haberes[a] = n
+	saldo = Haberes_mes(Jugador = int(jugador), nombre = nombre, H1=int(haberes[1]), H2=int(haberes[2]),H3=int(haberes[3]),H4=int(haberes[4]),H5=int(haberes[5]),H6=int(haberes[6]),H7=int(haberes[7]),H8=int(haberes[8]),H9=int(haberes[9]),H10=int(haberes[10]),H11=int(haberes[11]),H12=int(haberes[12]))
+	saldo.put()
 
 class Handler(webapp2.RequestHandler):
 	def write (self, *a, **kw):
@@ -206,7 +219,8 @@ class Jugadores (db.Model):
 	admin = db.BooleanProperty(default=False)
 
 class Haberes_mes (db.Model):
-	Jugador = db.StringProperty(required = True)
+	Jugador = db.IntegerProperty(required = True)
+	nombre = db.StringProperty(required = True)
 	H1 = db.IntegerProperty(default = 0)
 	H2 = db.IntegerProperty(default = 0)
 	H3 = db.IntegerProperty(default = 0)
@@ -254,9 +268,10 @@ class Pago(Handler):
 					user_monto = int(imonto)
 					user_nombre = str(ijugador)
 					user_comentario = str(idescr)
+					user_id = db.GqlQuery("Select * from Jugadores where nombre= :1", user_nombre).get().key().id()
 					nPago = Pagos(nombre = user_nombre, jugador_id = user_id, monto = user_monto, comentario = user_comentario, equipo = int(user_equipo_id), year = year, month = month)
 					nPago.put()
-					#agregar aca las lineas para que genere si no existe el db haberes_mes y para que calcule cada uno de los pagos totales por mes segun corresponda
+					cargar_haberes_mensuales(user_id)
 					""" Aca algunas lineas que ya pense, quizas el ID del jugador se puede sacar de la cooie
 					x = db.GqlQuery("Select * from Jugadores where usuario= :1", usuario).get()
 					if x:
@@ -350,8 +365,8 @@ class nuevoUsuario(Handler):
 			self.renderNuevo(errorUsuario = errorUsuario, inombre = nombre, iapellido = apellido)
 
 class MainPage(Handler):
-	def renderMain(self, gasto_mes_jugador="", equipo = "", cursorNombres="", cursorPago = "", deudaTotal="", pagosTotal="", saldoTotal="", cal = ""):
-		self.render("front.html", gasto_mes_jugador = gasto_mes_jugador, equipo = equipo, cursorNombres = cursorNombres, cursorPago = cursorPago, deudaTotal = deudaTotal, pagosTotal = pagosTotal, saldoTotal = saldoTotal, cal = cal)
+	def renderMain(self, cursorSaldo="", gasto_mes_jugador="", equipo = "", cursorNombres="", cursorPago = "", deudaTotal="", pagosTotal="", saldoTotal="", cal = ""):
+		self.render("front.html", cursorSaldo= cursorSaldo, gasto_mes_jugador = gasto_mes_jugador, equipo = equipo, cursorNombres = cursorNombres, cursorPago = cursorPago, deudaTotal = deudaTotal, pagosTotal = pagosTotal, saldoTotal = saldoTotal, cal = cal)
 
 	def get(self):
 		equipo = Equipos.get_by_id(int(self.request.cookies.get('equipo',0)))
@@ -365,6 +380,7 @@ class MainPage(Handler):
 		cal =  htmlcal.formatyear(year)
 		cursorPago = db.GqlQuery("Select * from Pagos where equipo = %s" %(str(equipo_id)))
 		cursorMensual = db.GqlQuery("Select * from MontoMensual order by mes desc")
+		cursorSaldo = db.GqlQuery("Select * from Haberes_mes order by mes desc")
 		jugadores = db.GqlQuery("Select * from Jugadores where equipo = %s" %(str(equipo_id)))
 		for i in cursorMensual:
 			deudaTotal = deudaTotal + i.deuda
@@ -376,7 +392,7 @@ class MainPage(Handler):
 			gasto_mes_jugador = int(equipo.gastos_total/12/tamano_equipo(equipo_id))
 		except:
 			gasto_mes_jugador = 0
-		self.renderMain(cal = cal, cursorNombres = jugadores, equipo = user_equipo, gasto_mes_jugador = gasto_mes_jugador, cursorPago = cursorPago)
+		self.renderMain(cal = cal, cursorNombres = jugadores, equipo = user_equipo, gasto_mes_jugador = gasto_mes_jugador, cursorPago = cursorPago, cursorSaldo = cursorSaldo)
 
 class Logout (Handler):
 	def get(self):
